@@ -20,9 +20,10 @@ NEXUS: SaaS de gestión y analíticas de comunidades de Discord. El usuario env�
 - **Fase 1** (base, diseño, dashboard demo en `/demo`): hecha.
 - **Fase 2** (login con Discord vía Auth.js v5, onboarding de comunidades): hecha y probada con Discord real. Ojo: el proveedor de Discord necesita `issuer: "https://discord.com"` en `src/server/auth/config.ts` o el callback falla (RFC 9207).
 - **Fase 3** (bot en `src/bot/`, tabla `message_events`, heartbeat, invitación, dashboard con datos reales): hecha y probada en vivo.
-- **Siguiente:** Fase 4, analíticas a partir de los eventos reales.
+- **Fase 4** (agregados diarios con marca de agua, retención de eventos de 30 días, `/analytics`): hecha y probada en vivo el 2026-10-28 (agregación al arrancar, nombres de canales, ingesta y `/analytics` cargando). Pendiente: ver filas agregadas tras el primer cambio de día UTC. Tests contra Postgres con `npm run test:db` (BD desechable `nexus_test`, ver `docs/PROGRESS.md`). Tras cada migración hay que reiniciar `npm run dev` y el bot.
+- **Siguiente:** Fase 5 (automatizaciones), cuando el usuario envíe el prompt.
 
-Detalle técnico y decisiones: `README.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md` (ADR-001 a ADR-031), `docs/PROGRESS.md`, `src/bot/README.md`.
+Detalle técnico y decisiones: `README.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md` (ADR-001 a ADR-038), `docs/PROGRESS.md`, `src/bot/README.md`.
 
 Discord:
 - Aplicación `NEXUS (dev)` en el Developer Portal, con redirect `http://localhost:3000/api/auth/callback/discord`.

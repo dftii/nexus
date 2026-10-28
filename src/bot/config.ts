@@ -6,12 +6,19 @@ import { parseAllowlist } from "./services/allowlist";
 export const MIN_HEARTBEAT_INTERVAL_MS = 5_000;
 export const MAX_HEARTBEAT_INTERVAL_MS = 120_000;
 
+/** Raw message events are kept at least 30 days (analytics windows rely on it). */
+export const MIN_RETENTION_DAYS = 30;
+export const MAX_RETENTION_DAYS = 365;
+export const DEFAULT_RETENTION_DAYS = 30;
+
 export interface BotConfig {
   token: string;
   databaseUrl: string;
   /** Valid, trimmed, deduplicated server IDs. Empty = processing disabled. */
   allowlist: string[];
   heartbeatIntervalMs: number;
+  /** Days of raw `message_events` kept; older days live only as aggregates. */
+  retentionDays: number;
 }
 
 export class BotConfigError extends Error {
@@ -78,6 +85,23 @@ export function parseBotConfig(
     }
   }
 
+  let retentionDays = DEFAULT_RETENTION_DAYS;
+  const rawRetention = nonEmpty(source.MESSAGE_EVENT_RETENTION_DAYS);
+  if (rawRetention !== undefined) {
+    const parsed = /^\d+$/.test(rawRetention) ? Number(rawRetention) : NaN;
+    if (
+      !Number.isInteger(parsed) ||
+      parsed < MIN_RETENTION_DAYS ||
+      parsed > MAX_RETENTION_DAYS
+    ) {
+      problems.push(
+        `MESSAGE_EVENT_RETENTION_DAYS must be an integer between ${MIN_RETENTION_DAYS} and ${MAX_RETENTION_DAYS}`,
+      );
+    } else {
+      retentionDays = parsed;
+    }
+  }
+
   if (problems.length > 0 || !base.success) throw new BotConfigError(problems);
 
   return {
@@ -85,5 +109,6 @@ export function parseBotConfig(
     databaseUrl: base.data.DATABASE_URL,
     allowlist: ids,
     heartbeatIntervalMs,
+    retentionDays,
   };
 }

@@ -1,23 +1,23 @@
 # Graph Report - nexus  (2026-10-28)
 
 ## Corpus Check
-- 321 files · ~246,880 words
+- 350 files · ~268,756 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 4, .example 1, .toml 1)
 
 ## Summary
-- 2305 nodes · 4280 edges · 179 communities (168 shown, 11 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 123 edges (avg confidence: 0.94)
+- 2505 nodes · 4947 edges · 196 communities (182 shown, 14 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 133 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `34ca5947`
+- Built from commit: `992d60d0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - hig-lookup.md
-- vitest
+- select.ts
 - pull-hig.mjs
 - Typography
 - ingestion.ts
@@ -27,10 +27,10 @@
 - Widgets
 - devDependencies
 - Apple Pay
-- login/page.tsx
+- analytics-view.tsx
 - Machine learning
 - Apple Design Skill
-- membership-growth-chart.tsx
+- formatNumber
 - scripts
 - compilerOptions
 - postgres
@@ -38,14 +38,14 @@
 - The menu bar
 - components.json
 - Standard icons
-- package.json
+- requireUser
 - HIG reference lookup
 - Color
-- dashboard-view.tsx
+- activity-feed.tsx
 - Buttons
 - Liquid Glass
 - Sign in with Apple
-- lucide-react
+- Button
 - NEXUS
 - Augmented reality
 - File management
@@ -73,7 +73,7 @@
 - Gestures
 - Toggles
 - bot/index.ts
-- types.ts
+- retention.int.test.ts
 - Accessibility
 - App Shortcuts
 - Layout
@@ -102,7 +102,7 @@
 - getDb
 - eslint.config.mjs
 - .prettierrc.json
-- onboarding-view.tsx
+- guild-select-form.tsx
 - Boxes
 - Controls
 - Disclosure controls
@@ -156,78 +156,91 @@
 - communities/index.ts
 - Reglas del proyecto
 - Cross-platform translation
-- message-activity-chart.tsx
+- activity/queries.ts
 - Combo boxes
-- Dock menus
-- Feedback
-- format.ts
+- the-menu-bar.md
+- playing-haptics.md
+- activity-metrics.tsx
 - NEXUS Discord bot
-- Image wells
+- image-views.md
 - Project plan
-- Outline views
-- onboarding/page.tsx
+- layout.md
+- getEligibleGuilds
 - Ratings and reviews
 - Token fields
 - Web views
-- Phase 3
+- designing-for-games.md
 - guilds.ts
 - AGENTS.md
 - .claude/CLAUDE.md
-- README.md
-- user-menu.tsx
+- Phase 3
+- cn
 - health/route.ts
-- App shell
+- cn
 - api.ts
 - installation.ts
-- ResizeObserverStub
+- fake-db.ts
+- env.ts
 - repository.ts
+- tokens.ts
 - prisma
 - { GET, POST }
-- allowlist.ts
-- dashboard-page.test.tsx
+- vitest
+- analytics/page.tsx
 - installation.test.ts
-- logger.ts
-- mobile-nav.tsx
-- getDb
-- Ingestion
-- community-header.tsx
+- channel-sync.ts
+- pure.ts
+- analytics.ts
+- analytics-page.test.tsx
+- analytics-maintenance.ts
+- queries.test.ts
+- analytics.test.ts
+- isAuthConfigured
+- Phase 4
+- bot-status.ts
+- permissions.ts
+- dashboard-page.test.tsx
+- tokens.test.ts
+- Phase 2
+- @testing-library/react
+- ResizeObserverStub
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 62 edges
-2. `vitest` - 47 edges
-3. `Decisions` - 32 edges
-4. `Button()` - 31 edges
-5. `lucide-react` - 28 edges
-6. `next` - 28 edges
-7. `getDb()` - 28 edges
-8. `Card()` - 24 edges
-9. `CardContent()` - 23 edges
-10. `requireUser()` - 23 edges
+2. `vitest` - 57 edges
+3. `Decisions` - 39 edges
+4. `getDb()` - 34 edges
+5. `Button()` - 33 edges
+6. `Card()` - 32 edges
+7. `lucide-react` - 30 edges
+8. `next` - 30 edges
+9. `CardContent()` - 30 edges
+10. `requireUser()` - 25 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ADR-014: Navigation config with a `"soon"` status` --references--> `ComingSoon()`  [INFERRED]
-  docs/DECISIONS.md → src/components/common/coming-soon.tsx
+- `ADR-033: Aggregation job: one transaction, advisory lock, late events` --references--> `createAggregationService()`  [INFERRED]
+  docs/DECISIONS.md → src/bot/services/aggregation.ts
+- `ADR-035: Scheduler for the analytics jobs` --references--> `createAnalyticsMaintenance()`  [INFERRED]
+  docs/DECISIONS.md → src/bot/services/analytics-maintenance.ts
+- `ADR-034: Raw-event retention with verified deletion` --references--> `createRetentionService()`  [INFERRED]
+  docs/DECISIONS.md → src/bot/services/retention.ts
 - `What to search for` --references--> `Button()`  [INFERRED]
   .claude/skills/apple-design/references/code-audit.md → src/components/ui/button.tsx
-- `Environment handling` --references--> `getEnv()`  [INFERRED]
-  docs/ARCHITECTURE.md → src/lib/env.ts
-- `ADR-003: Next.js App Router, TypeScript strict, Tailwind v4, shadcn/ui` --references--> `cn()`  [INFERRED]
-  docs/DECISIONS.md → src/lib/utils.ts
-- `Session strategy` --references--> `requireUser()`  [INFERRED]
-  docs/ARCHITECTURE.md → src/server/auth/user.ts
+- `ADR-037: Analytics read side and `/analytics`` --references--> `MessageActivityChart()`  [INFERRED]
+  docs/DECISIONS.md → src/features/dashboard/components/message-activity-chart.tsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (179 total, 11 thin omitted)
+## Communities (196 total, 14 thin omitted)
 
 ### Community 0 - "hig-lookup.md"
-Cohesion: 0.05
-Nodes (29): Best practices, Column views, Platform considerations, Related guidelines, Best practices, Designing for iOS, Best practices, Designing for iPadOS (+21 more)
+Cohesion: 0.16
+Nodes (4): Background tag reading, In-app tag reading, NFC, Platform considerations
 
-### Community 1 - "vitest"
-Cohesion: 0.14
-Nodes (24): ADR-0021, ADR-022: The demo state is per route, not a global switch, AnalyticsPage(), metadata, AutomationsPage(), metadata, LeaderboardPage(), metadata (+16 more)
+### Community 1 - "select.ts"
+Cohesion: 0.21
+Nodes (8): ADR-020: Community selection, tenant isolation and the active-community cookie, isUniqueViolation(), persist(), selectCommunity(), SelectCommunityResult, snowflakeSchema, fake, guildsMock
 
 ### Community 2 - "pull-hig.mjs"
 Cohesion: 0.06
@@ -238,36 +251,36 @@ Cohesion: 0.06
 Nodes (33): AX1, AX2, AX3, AX4, AX5, Change log, Conveying hierarchy, Desktop (macOS) (+25 more)
 
 ### Community 4 - "ingestion.ts"
-Cohesion: 0.14
-Nodes (13): Allowlist, CachedCommunity, CommunityCache, createIngestion(), Classification, classifyMessage(), createRejectionCounter(), extractMessageDto() (+5 more)
+Cohesion: 0.11
+Nodes (14): Allowlist, CachedCommunity, CommunityCache, createIngestion(), Ingestion, Classification, classifyMessage(), createRejectionCounter() (+6 more)
 
 ### Community 5 - "Live Activities"
 Cohesion: 0.07
 Nodes (28): Adding transitions and animating content updates, Anatomy, Best practices, CarPlay, CarPlay dimensions, Change log, Choosing colors, Compact (+20 more)
 
 ### Community 6 - "dependencies"
-Cohesion: 0.07
-Nodes (29): dependencies, @auth/prisma-adapter@2.11.3, class-variance-authority@0.7.1, clsx@2.1.1, cn@0.5.0, discord.js@14.27.0, geist@1.8.2, lucide-react@1.63.0 (+21 more)
+Cohesion: 0.08
+Nodes (26): dependencies, @auth/prisma-adapter@2.11.3, class-variance-authority@0.7.1, cn@0.5.0, discord.js@14.27.0, geist@1.8.2, lucide-react@1.63.0, next@16.4.3 (+18 more)
 
 ### Community 7 - "demo.ts"
-Cohesion: 0.12
-Nodes (22): addDays(), buildDays(), buildFeed(), DayRecord, DEMO_END_DATE, DEMO_SEED, DemoOptions, HISTORY_DAYS (+14 more)
+Cohesion: 0.09
+Nodes (31): ADR-013: Deterministic demo data behind `getDashboardData()`, DemoPage(), metadata, addDays(), buildDays(), buildDemoDashboardData(), buildFeed(), DayRecord (+23 more)
 
 ### Community 8 - "Widgets"
 Cohesion: 0.08
 Nodes (25): Accented, Accessory widgets, Adding interactivity, Anatomy, Appearances, Apple HomeView, Best practices, Change log (+17 more)
 
 ### Community 9 - "devDependencies"
-Cohesion: 0.08
-Nodes (25): devDependencies, jsdom@30.1.3, prettier@3.9.10, prettier-plugin-tailwindcss@0.8.1, tailwindcss@4.3.3, @tailwindcss/turbopack@4.3.3, @testing-library/react@16.3.3, @testing-library/user-event@14.6.8 (+17 more)
+Cohesion: 0.07
+Nodes (40): clsx@2.1.1, description, devDependencies, jsdom@30.1.3, prettier@3.9.10, prettier-plugin-tailwindcss@0.8.1, tailwindcss@4.3.3, @tailwindcss/turbopack@4.3.3 (+32 more)
 
 ### Community 10 - "Apple Pay"
 Cohesion: 0.09
 Nodes (23): Apple Pay, Apple Pay button, Apple Pay mark, Black, Button size and position, Button styles, Button types, Change log (+15 more)
 
-### Community 11 - "login/page.tsx"
-Cohesion: 0.11
-Nodes (34): Design system and UI, Tokens, Typography, Loading(), Loading(), LoginPage(), metadata, SearchParams (+26 more)
+### Community 11 - "analytics-view.tsx"
+Cohesion: 0.12
+Nodes (37): Loading(), ChartSkeleton(), Loading(), Loading(), LoginPage(), metadata, SearchParams, ChartCardProps (+29 more)
 
 ### Community 12 - "Machine learning"
 Cohesion: 0.10
@@ -277,13 +290,13 @@ Nodes (20): Attribution, Calibration, Change log, Confidence, Corrections, Criti
 Cohesion: 0.10
 Nodes (19): Always load, Apple Design Skill, Apple's design principles, Design improvement mode, Every page, by Apple's section, Lens 1: Accessibility (failures are Critical), Lens 2: Platform conventions (failures are usually High), Lens 3: Visual design and craft (findings are High or Medium) (+11 more)
 
-### Community 14 - "membership-growth-chart.tsx"
-Cohesion: 0.16
-Nodes (15): recharts, ChartConfig, ChartContext, ChartContextProps, ChartLegendContent(), ChartStyle(), ChartTooltipContent(), getPayloadConfigFromPayload() (+7 more)
+### Community 14 - "formatNumber"
+Cohesion: 0.09
+Nodes (43): ADR-012: Recharts through the shadcn `chart` primitive, recharts, ChartCard(), SrDataTable(), SrDataTableProps, ChartConfig, ChartContainer(), ChartContext (+35 more)
 
 ### Community 15 - "scripts"
 Cohesion: 0.09
-Nodes (22): scripts, bot:dev, bot:start, build, check, db:deploy, db:down, db:generate (+14 more)
+Nodes (23): scripts, bot:dev, bot:start, build, check, db:deploy, db:down, db:generate (+15 more)
 
 ### Community 16 - "compilerOptions"
 Cohesion: 0.10
@@ -309,9 +322,9 @@ Nodes (17): aliases, components, hooks, lib, ui, utils, iconLibrary, rsc (+9 mor
 Cohesion: 0.12
 Nodes (17): Best practices, Change log, Desktop (macOS), Document icons, Editing, Icons, Layer ordering, Other (+9 more)
 
-### Community 22 - "package.json"
-Cohesion: 0.12
-Nodes (16): tailwind-merge@3.7.0, description, @testing-library/jest-dom@7.0.1, tsx@4.23.15, @types/node@24.19.2, @types/pg@8.23.1, engines, node (+8 more)
+### Community 22 - "requireUser"
+Cohesion: 0.20
+Nodes (11): Active community cookie, Authentication and authorization, Discord token storage and refresh, Route protection model, Session strategy, Sign-in flow, Tenant isolation, ADR-016: Database sessions, minimal public session, server-side authorization (+3 more)
 
 ### Community 23 - "HIG reference lookup"
 Cohesion: 0.12
@@ -321,9 +334,9 @@ Nodes (16): Components › Content, Components › Layout and organization, Comp
 Cohesion: 0.13
 Nodes (15): App accent colors, Best practices, Change log, Color, Color management, Desktop (macOS), Inclusive color, iOS, iPadOS system gray colors (+7 more)
 
-### Community 25 - "dashboard-view.tsx"
-Cohesion: 0.32
-Nodes (9): Dashboard demo mode, ADR-013: Deterministic demo data behind `getDashboardData()`, DemoPage(), metadata, DashboardView(), DemoBanner(), buildDemoDashboardData(), getDashboardData() (+1 more)
+### Community 25 - "activity-feed.tsx"
+Cohesion: 0.16
+Nodes (17): Dashboard demo mode, Design system and UI, Tokens, Typography, ActivityFeed(), ActivityFeedProps, eventMeta, DashboardView() (+9 more)
 
 ### Community 26 - "Buttons"
 Cohesion: 0.14
@@ -337,13 +350,13 @@ Nodes (14): Apple's rules, Color on glass, Cross-platform translation, Flutter, 
 Cohesion: 0.14
 Nodes (14): Black, Button size and corner radius, Change log, Collecting data, Creating a custom Sign in with Apple button, Custom buttons with a logo and text, Custom logo-only buttons, Displaying buttons (+6 more)
 
-### Community 29 - "lucide-react"
-Cohesion: 0.16
-Nodes (16): lucide-react, DashboardError(), ProtectedError(), EmptyState(), EmptyStateProps, changeStyles, StatCard(), StatCardProps (+8 more)
+### Community 29 - "Button"
+Cohesion: 0.15
+Nodes (24): ADR-024: Onboarding and Overview states, nextConfig, lucide-react, next, react, DashboardError(), ProtectedError(), EmptyState() (+16 more)
 
 ### Community 30 - "NEXUS"
-Cohesion: 0.11
-Nodes (19): App shell, Current limitations, Database, Demo mode, Design system, Discord application setup, Documentation, Environment variables (+11 more)
+Cohesion: 0.10
+Nodes (20): Analytics, App shell, Current limitations, Database, Demo mode, Design system, Discord application setup, Documentation (+12 more)
 
 ### Community 31 - "Augmented reality"
 Cohesion: 0.15
@@ -362,16 +375,16 @@ Cohesion: 0.17
 Nodes (12): Actions, Best practices, Change log, Desktop (macOS), Item groupings, Navigation, Phone (iOS), Platform considerations (+4 more)
 
 ### Community 35 - "Decisions"
-Cohesion: 0.07
-Nodes (32): ADR-001: npm as package manager, ADR-002: Single package at the repo root, no workspaces, ADR-003: Next.js App Router, TypeScript strict, Tailwind v4, shadcn/ui, ADR-004: Pin TypeScript 6 and ESLint 9, ADR-005: Prisma 7.10.1 (stable), not the 8.0 release candidate, ADR-006: Initial schema is only User, Community, CommunityMembership, ADR-007: Lazy environment validation, ADR-008: Health (liveness) and ready (readiness) split (+24 more)
+Cohesion: 0.08
+Nodes (25): ADR-001: npm as package manager, ADR-002: Single package at the repo root, no workspaces, ADR-003: Next.js App Router, TypeScript strict, Tailwind v4, shadcn/ui, ADR-004: Pin TypeScript 6 and ESLint 9, ADR-005: Prisma 7.10.1 (stable), not the 8.0 release candidate, ADR-006: Initial schema is only User, Community, CommunityMembership, ADR-008: Health (liveness) and ready (readiness) split, ADR-009: Initial migration generated without a database (+17 more)
 
 ### Community 36 - "getDb"
-Cohesion: 0.13
-Nodes (19): RFC-9207, ADR-016: Database sessions, minimal public session, server-side authorization, ADR-017: Discord scopes `identify guilds`, email stays null, buildAuthConfig(), DISCORD_SCOPES, DiscordProfileInput, discordProfileSchema, mapDiscordProfile() (+11 more)
+Cohesion: 0.20
+Nodes (14): RFC-9207, next-auth@5.0.0-beta.32, next-auth, buildAuthConfig(), DISCORD_SCOPES, DiscordProfileInput, discordProfileSchema, mapDiscordProfile() (+6 more)
 
 ### Community 37 - "auth/index.ts"
-Cohesion: 0.18
-Nodes (16): server-only, ProtectedLayout(), metadata, OverviewPage(), getAuthEnv(), isAuthConfigured(), auth, handlers (+8 more)
+Cohesion: 0.27
+Nodes (7): auth, handlers, DbUserLike, PublicSession, PublicUser, getCurrentUser, mocks
 
 ### Community 38 - "Apple Pencil and Scribble"
 Cohesion: 0.18
@@ -446,12 +459,12 @@ Cohesion: 0.20
 Nodes (10): Best practices, Change log, Checkboxes, Desktop (macOS), Mobile (iOS, iPadOS), Platform considerations, Radio buttons, Related guidelines (+2 more)
 
 ### Community 56 - "bot/index.ts"
-Cohesion: 0.21
-Nodes (14): discord.js, BOT_INTENTS, createBotClient(), BotConfigError, parseBotConfig(), createGuildDirectory(), registerLifecycleHandlers(), main() (+6 more)
+Cohesion: 0.14
+Nodes (23): discord.js, BOT_INTENTS, createBotClient(), createChannelDirectory(), createGuildDirectory(), registerLifecycleHandlers(), registerMessageHandler(), main() (+15 more)
 
-### Community 57 - "types.ts"
-Cohesion: 0.26
-Nodes (9): SummaryStatsProps, buildMetric(), computeDelta(), sum(), ActivityEventType, DashboardSummary, DataSource, Delta (+1 more)
+### Community 57 - "retention.int.test.ts"
+Cohesion: 0.14
+Nodes (25): AggregationResult, createAggregationService(), LATE_EVENT_MARGIN_MS, DEFAULT_DELETE_BATCH_SIZE, DEFAULT_MAX_DELETE_BATCHES, RetentionResult, createTestPrisma(), hasTestDatabase (+17 more)
 
 ### Community 58 - "Accessibility"
 Cohesion: 0.22
@@ -550,12 +563,12 @@ Cohesion: 0.25
 Nodes (8): Best practices, Change log, Custom input views, Custom keyboards, Mobile (iOS, iPadOS), Platform considerations, Related guidelines, Virtual keyboards
 
 ### Community 82 - "Architecture"
-Cohesion: 0.09
-Nodes (23): Active community cookie, Architecture, Authentication and authorization, Data flow, Data flow (current), Database access, Database boundary, Demo separation (+15 more)
+Cohesion: 0.14
+Nodes (14): Architecture, Bot status model, Data flow, Data flow (current), Database access, Database boundary, Directory layout, Discord bot process (+6 more)
 
 ### Community 83 - "getDb"
-Cohesion: 0.29
-Nodes (6): dynamic, GET(), pingDatabase(), { pingDatabase }, run(), { queryRaw, getDb }
+Cohesion: 0.16
+Nodes (12): ADR-025: A framework-agnostic Prisma core; `server-only` stays on the web entry, @prisma/adapter-pg@7.10.1, @prisma/adapter-pg, dynamic, GET(), pingDatabase(), createPrismaClient(), getPrismaClient() (+4 more)
 
 ### Community 84 - "eslint.config.mjs"
 Cohesion: 0.25
@@ -565,9 +578,9 @@ Nodes (7): eslintConfig, eslint@9.39.5, eslint-config-next@16.4.3, eslint-config
 Cohesion: 0.25
 Nodes (7): plugins, printWidth, semi, singleQuote, tailwindFunctions, tailwindStylesheet, trailingComma
 
-### Community 86 - "onboarding-view.tsx"
-Cohesion: 0.13
-Nodes (26): Layering, ADR-024: Onboarding and Overview states, @testing-library/react, Button(), buttonVariants, signInWithDiscordAction(), DiscordSubmitButton(), MESSAGES (+18 more)
+### Community 86 - "guild-select-form.tsx"
+Cohesion: 0.24
+Nodes (11): MESSAGES, selectCommunityAction(), GuildSelectForm(), formatSeconds(), retrySeconds(), selectErrorMessage(), initialSelectCommunityState, SelectCommunityErrorCode (+3 more)
 
 ### Community 87 - "Boxes"
 Cohesion: 0.29
@@ -770,148 +783,204 @@ Cohesion: 0.40
 Nodes (5): Best practices, Desktop (macOS), Platform considerations, Related guidelines, Steppers
 
 ### Community 137 - "communities/index.ts"
-Cohesion: 0.05
-Nodes (46): Tenant isolation, ADR-020: Community selection, tenant isolation and the active-community cookie, Automated checks, Known gaps and follow-ups, Mocked (automated tests; Discord and, mostly, the database are replaced), Not verified, Phase 2, Verified live with a real Discord application (2026-10-28, `npm run dev`) (+38 more)
+Cohesion: 0.18
+Nodes (18): Mocked (automated tests; Discord and, mostly, the database are replaced), HeaderAccount(), loadMenuProps(), UserMenuProps, ActivityContext, ACTIVE_COMMUNITY_COOKIE, clearActiveCommunityCookie(), getActiveCommunity (+10 more)
 
 ### Community 138 - "Reglas del proyecto"
-Cohesion: 0.40
-Nodes (4): graphify, Idioma, Modelos y subagentes, Reglas del proyecto
+Cohesion: 0.25
+Nodes (7): Estado del proyecto (actualizar al terminar cada fase), Forma de trabajar, graphify, Idioma, Modelos y subagentes, Puesta en marcha en otro ordenador, Reglas del proyecto
 
 ### Community 139 - "Cross-platform translation"
 Cohesion: 0.50
 Nodes (3): Conventions to check, Cross-platform translation, Vocabulary
 
-### Community 140 - "message-activity-chart.tsx"
-Cohesion: 0.27
-Nodes (14): ADR-012: Recharts through the shadcn `chart` primitive, ChartCard(), SrDataTable(), SrDataTableProps, ChartContainer(), GrowthCard(), MembershipGrowthChart(), config (+6 more)
+### Community 140 - "activity/queries.ts"
+Cohesion: 0.19
+Nodes (24): ADR-031: Overview data: honest activity summary, createRetentionService(), addUtcDays(), startOfUtcDay(), getAnalyticsData(), isAggregationStale(), rangeStart(), rawStart() (+16 more)
 
 ### Community 141 - "Combo boxes"
 Cohesion: 0.50
 Nodes (4): Best practices, Combo boxes, Platform considerations, Related guidelines
 
-### Community 142 - "Dock menus"
-Cohesion: 0.50
-Nodes (4): Best practices, Dock menus, Platform considerations, Related guidelines
+### Community 142 - "the-menu-bar.md"
+Cohesion: 0.11
+Nodes (15): Best practices, Dock menus, Platform considerations, Related guidelines, Best practices, Home Screen quick actions, Platform considerations, Related guidelines (+7 more)
 
-### Community 143 - "Feedback"
-Cohesion: 0.50
-Nodes (4): Best practices, Feedback, Platform considerations, Related guidelines
+### Community 143 - "playing-haptics.md"
+Cohesion: 0.15
+Nodes (8): Best practices, Feedback, Platform considerations, Related guidelines, Best practices, Gyroscope and accelerometer, Platform considerations, Related guidelines
 
-### Community 144 - "format.ts"
-Cohesion: 0.18
-Nodes (16): StatChange, SummaryStats(), toStatChange(), compact, dateTime, dayMonth, dayMonthYear, formatCompact() (+8 more)
+### Community 144 - "activity-metrics.tsx"
+Cohesion: 0.21
+Nodes (12): Demo separation, changeStyles, StatCard(), StatCardProps, StatChange, ActivityMetrics(), Id(), RecentActivity() (+4 more)
 
 ### Community 145 - "NEXUS Discord bot"
-Cohesion: 0.15
-Nodes (13): Allowlist: which server ids, Architecture, Environment variables, Heartbeat semantics, Intents and why, Invite with minimal permissions, Manual test plan (server CAPTURAS), NEXUS Discord bot (+5 more)
+Cohesion: 0.13
+Nodes (15): Allowlist: which server ids, Analytics maintenance (Phase 4), Architecture, Environment variables, Heartbeat semantics, Intents and why, Invite with minimal permissions, Manual test plan (server CAPTURAS) (+7 more)
 
-### Community 146 - "Image wells"
-Cohesion: 0.50
+### Community 146 - "image-views.md"
+Cohesion: 0.20
 Nodes (4): Best practices, Image wells, Platform considerations, Related guidelines
 
 ### Community 147 - "Project plan"
 Cohesion: 0.20
-Nodes (10): Out of scope (for now), Phase 1 - Technical foundation (done), Phase 2 - Discord OAuth2 and real communities (implemented, pending live Discord check), Phase 3 - Bot process and message ingestion (implemented, pending live Discord check), Phase 4 - Analytics from real data (next), Phase 5 - Automations (rules), Phase 6 - Moderation and audit logs, Phase 7 - XP and leaderboards (+2 more)
+Nodes (10): Out of scope (for now), Phase 1 - Technical foundation (done), Phase 2 - Discord OAuth2 and real communities (implemented, pending live Discord check), Phase 3 - Bot process and message ingestion (implemented, pending live Discord check), Phase 4 - Analytics from real data (implemented, pending live check), Phase 5 - Automations (rules), Phase 6 - Moderation and audit logs, Phase 7 - XP and leaderboards (+2 more)
 
-### Community 148 - "Outline views"
-Cohesion: 0.50
-Nodes (4): Best practices, Outline views, Platform considerations, Related guidelines
+### Community 148 - "layout.md"
+Cohesion: 0.15
+Nodes (8): Best practices, Column views, Platform considerations, Related guidelines, Best practices, Outline views, Platform considerations, Related guidelines
 
-### Community 149 - "onboarding/page.tsx"
-Cohesion: 0.32
-Nodes (4): metadata, OnboardingPage(), mocks, renderPage()
+### Community 149 - "getEligibleGuilds"
+Cohesion: 0.31
+Nodes (5): metadata, OnboardingPage(), getEligibleGuilds(), mocks, renderPage()
 
 ### Community 150 - "Ratings and reviews"
 Cohesion: 0.50
 Nodes (4): Best practices, Change log, Platform considerations, Ratings and reviews
 
 ### Community 151 - "Token fields"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (4): Best practices, Platform considerations, Related guidelines, Token fields
 
 ### Community 152 - "Web views"
 Cohesion: 0.50
 Nodes (3): Best practices, Platform considerations, Web views
 
-### Community 153 - "Phase 3"
-Cohesion: 0.50
-Nodes (4): Known gaps and follow-ups, Not verified (never run), Phase 3, Verified (a real command or run observed it)
+### Community 153 - "designing-for-games.md"
+Cohesion: 0.19
+Nodes (6): Best practices, Designing for iOS, Best practices, Designing for iPadOS, Best practices, Designing for macOS
 
 ### Community 154 - "guilds.ts"
-Cohesion: 0.23
-Nodes (13): FetchGuildsOptions, EligibleGuild, EligibleGuildsResult, GuildServiceOptions, REASON_ORDER, ADMINISTRATOR, EligibilityReason, getEligibility() (+5 more)
+Cohesion: 0.19
+Nodes (12): FetchGuildsOptions, buildGuildIconUrl(), EligibleGuild, EligibleGuildsResult, GuildServiceOptions, REASON_ORDER, EligibilityReason, TokenOptions (+4 more)
 
-### Community 157 - "README.md"
-Cohesion: 0.31
-Nodes (3): Not implemented yet (by design), Phase 1 (done and verified), Progress
+### Community 157 - "Phase 3"
+Cohesion: 0.33
+Nodes (6): Known gaps and follow-ups, Mocked (automated tests with fakes), Not verified, Phase 3, Verified (a real command or run observed it), Verified live against Discord (2026-10-28, test server CAPTURAS)
 
-### Community 159 - "user-menu.tsx"
-Cohesion: 0.15
-Nodes (26): ADR-023: Account menu in the header and a membership-only community switcher, radix-ui, Avatar(), AvatarBadge(), AvatarFallback(), AvatarGroup(), AvatarGroupCount(), AvatarImage() (+18 more)
+### Community 159 - "cn"
+Cohesion: 0.16
+Nodes (23): radix-ui, Avatar(), AvatarBadge(), AvatarFallback(), AvatarGroup(), AvatarGroupCount(), AvatarImage(), CardAction() (+15 more)
 
-### Community 161 - "App shell"
-Cohesion: 0.13
-Nodes (17): App shell, nextConfig, next, AppLayout(), metadata, RootLayout(), viewport, AppHeader() (+9 more)
+### Community 161 - "cn"
+Cohesion: 0.06
+Nodes (47): ADR-0021, App shell, ADR-014: Navigation config with a `"soon"` status, ADR-022: The demo state is per route, not a global switch, AppLayout(), AutomationsPage(), metadata, LeaderboardPage() (+39 more)
 
 ### Community 162 - "api.ts"
-Cohesion: 0.08
-Nodes (23): zod@4.6.7, zod, attempt(), AttemptResult, DISCORD_API_BASE, DiscordApiError, DiscordGuild, fetchCurrentUserGuilds() (+15 more)
+Cohesion: 0.15
+Nodes (10): attempt(), AttemptResult, DiscordApiError, DiscordGuild, fetchCurrentUserGuilds(), FetchGuildsResult, guildSchema, guildsSchema (+2 more)
 
 ### Community 163 - "installation.ts"
 Cohesion: 0.11
 Nodes (7): ADR-026: Bot runtime: discord.js 14.27.0, tsx, minimal intents, separate process, registerGuildHandlers(), Heartbeat, GuildDirectory, GuildPresence, InstallationService, BotRepository
 
+### Community 164 - "fake-db.ts"
+Cohesion: 0.12
+Nodes (14): ADR-023: Account menu in the header and a membership-only community switcher, switchActiveCommunityAction(), fake, mocks, run(), AccountRow, CommunityRow, createFakeDb() (+6 more)
+
+### Community 165 - "env.ts"
+Cohesion: 0.23
+Nodes (10): ADR-007: Lazy environment validation, zod@4.6.7, zod, AuthEnv, authEnvSchema, getEnv(), parseEnv(), resetEnvCache() (+2 more)
+
 ### Community 167 - "repository.ts"
-Cohesion: 0.13
-Nodes (14): BatchWriter, BatchWriterOptions, createBatchWriter(), DEFAULT_FLUSH_INTERVAL_MS, DEFAULT_MAX_BACKOFF_MS, DEFAULT_MAX_BATCH, DEFAULT_MAX_BUFFER, DEFAULT_STOP_TIMEOUT_MS (+6 more)
+Cohesion: 0.10
+Nodes (14): vitest, BatchWriter, createBatchWriter(), DEFAULT_FLUSH_INTERVAL_MS, DEFAULT_MAX_BACKOFF_MS, DEFAULT_MAX_BATCH, DEFAULT_MAX_BUFFER, DEFAULT_STOP_TIMEOUT_MS (+6 more)
 
-### Community 174 - "allowlist.ts"
-Cohesion: 0.26
-Nodes (9): BotConfig, MAX_HEARTBEAT_INTERVAL_MS, MIN_HEARTBEAT_INTERVAL_MS, nonEmpty(), schema, isSnowflake(), parseAllowlist(), ParsedAllowlist (+1 more)
+### Community 170 - "tokens.ts"
+Cohesion: 0.24
+Nodes (10): DISCORD_API_BASE, accountSelect, DiscordTokenResult, getValidDiscordAccessToken(), hasGuildsScope(), isExpired(), RefreshOutcome, refreshResponseSchema (+2 more)
 
-### Community 175 - "dashboard-page.test.tsx"
+### Community 174 - "vitest"
+Cohesion: 0.16
+Nodes (16): BotConfig, BotConfigError, DEFAULT_RETENTION_DAYS, MAX_HEARTBEAT_INTERVAL_MS, MAX_RETENTION_DAYS, MIN_HEARTBEAT_INTERVAL_MS, MIN_RETENTION_DAYS, nonEmpty() (+8 more)
+
+### Community 175 - "analytics/page.tsx"
+Cohesion: 0.31
+Nodes (10): AnalyticsPage(), metadata, metadata, OverviewPage(), navMetadata(), OverviewUnavailable(), BOT_INVITE_PERMISSIONS, buildBotInviteUrl() (+2 more)
+
+### Community 176 - "installation.test.ts"
+Cohesion: 0.27
+Nodes (13): createAllowlist(), createCommunityCache(), silentLogger, setup(), AT, setup(), beat(), setup() (+5 more)
+
+### Community 177 - "channel-sync.ts"
+Cohesion: 0.17
+Nodes (8): ChannelSource, MESSAGE_CHANNEL_TYPES, registerChannelHandlers(), toChannelInfo(), ChannelDirectory, ChannelInfo, ChannelRepository, ChannelSync
+
+### Community 178 - "pure.ts"
+Cohesion: 0.15
+Nodes (17): Mocked (automated tests with fakes), DEFAULT_RANGE, parseRange(), RANGES, rangeSchema, DAY_MS, utcDayKey(), utcDayRange() (+9 more)
+
+### Community 179 - "analytics.ts"
+Cohesion: 0.15
+Nodes (22): Analytics pipeline, server-only, RangeDays, BotStatus, ANALYTICS_RECENT_LIMIT, AnalyticsActivity, AnalyticsCoverage, AnalyticsData (+14 more)
+
+### Community 180 - "analytics-page.test.tsx"
+Cohesion: 0.28
+Nodes (8): community, d(), heatmap(), mocks, NOW, ok(), renderPage(), user
+
+### Community 181 - "analytics-maintenance.ts"
+Cohesion: 0.11
+Nodes (11): AggregationService, ANALYTICS_INTERVAL_MS, AnalyticsMaintenance, createAnalyticsMaintenance(), RunSummary, BatchWriterOptions, Logger, RetentionService (+3 more)
+
+### Community 183 - "queries.test.ts"
+Cohesion: 0.18
+Nodes (9): Call, D7, db, H24, NOW, routeRaw(), sql(), T0 (+1 more)
+
+### Community 185 - "analytics.test.ts"
+Cohesion: 0.29
+Nodes (4): FIRST, mocks, NOW, W
+
+### Community 186 - "isAuthConfigured"
+Cohesion: 0.24
+Nodes (10): Layering, ADR-015: Auth.js v5 with the Prisma adapter, signInWithDiscordAction(), signOutAction(), loginErrorMessage(), MESSAGES, safeRedirectPath(), isAuthConfigured() (+2 more)
+
+### Community 187 - "Phase 4"
+Cohesion: 0.25
+Nodes (8): Known gaps and follow-ups, Not implemented yet (by design), Not verified, Phase 1 (done and verified), Phase 4, Progress, Verified (a real command or run observed it), Verified live against Discord (CAPTURAS, `npm run bot:start` started by the developer)
+
+### Community 188 - "bot-status.ts"
+Cohesion: 0.32
+Nodes (5): BOT_HEARTBEAT_STALE_AFTER_MS, BotStatusFields, getBotStatus(), botConnectedAt, now
+
+### Community 189 - "permissions.ts"
+Cohesion: 0.54
+Nodes (6): ADMINISTRATOR, getEligibility(), hasPermission(), isEligibleGuild(), MANAGE_GUILD, parsePermissions()
+
+### Community 190 - "dashboard-page.test.tsx"
 Cohesion: 0.29
 Nodes (7): community(), data(), emptySummary, mocks, NOW, renderPage(), user
 
-### Community 176 - "installation.test.ts"
-Cohesion: 0.17
-Nodes (11): vitest, createAllowlist(), createCommunityCache(), beat(), setup(), T0, T1, setup() (+3 more)
-
-### Community 177 - "logger.ts"
-Cohesion: 0.17
-Nodes (8): LogFields, Logger, LoggerOptions, LogLevel, ORDER, REDACTED, redactString(), scrub()
-
-### Community 178 - "mobile-nav.tsx"
+### Community 191 - "tokens.test.ts"
 Cohesion: 0.29
-Nodes (11): react, MobileNav(), Sheet(), SheetContent(), SheetDescription(), SheetFooter(), SheetHeader(), SheetOverlay() (+3 more)
+Nodes (3): fake, NOW_MS, NOW_S
 
-### Community 179 - "getDb"
-Cohesion: 0.11
-Nodes (27): Bot status model, ADR-031: Overview data: honest activity summary, Mocked (automated tests with fakes), BOT_HEARTBEAT_DEFAULT_INTERVAL_MS, BOT_HEARTBEAT_STALE_AFTER_MS, BotStatus, BotStatusFields, getBotStatus() (+19 more)
+### Community 193 - "Phase 2"
+Cohesion: 0.33
+Nodes (6): Automated checks, Known gaps and follow-ups, Not verified, Phase 2, Verified live with a real Discord application (2026-10-28, `npm run dev`), Verified (observed against real services)
 
-### Community 181 - "community-header.tsx"
-Cohesion: 0.43
-Nodes (6): class-variance-authority, Badge(), badgeVariants, BotStatusBadge(), CommunityHeader(), ROLE_LABEL
+### Community 194 - "@testing-library/react"
+Cohesion: 0.40
+Nodes (3): @testing-library/react@16.3.3, @testing-library/react, refresh
 
 ## Knowledge Gaps
 - **3 isolated node(s):** `ADR-0021`, `RFC-9207`, `{ GET, POST }`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1232 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1305 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `vitest` connect `installation.test.ts` to `vitest`, `ingestion.ts`, `demo.ts`, `devDependencies`, `communities/index.ts`, `login/page.tsx`, `format.ts`, `onboarding/page.tsx`, `package.json`, `guilds.ts`, `lucide-react`, `user-menu.tsx`, `health/route.ts`, `App shell`, `api.ts`, `Decisions`, `getDb`, `auth/index.ts`, `repository.ts`, `allowlist.ts`, `dashboard-page.test.tsx`, `getDb`, `bot/index.ts`, `types.ts`, `Architecture`, `getDb`, `onboarding-view.tsx`?**
-  _High betweenness centrality (0.090) - this node is a cross-community bridge._
+- **Why does `vitest` connect `repository.ts` to `select.ts`, `ingestion.ts`, `demo.ts`, `devDependencies`, `communities/index.ts`, `analytics-view.tsx`, `activity/queries.ts`, `formatNumber`, `getEligibleGuilds`, `activity-feed.tsx`, `guilds.ts`, `Button`, `cn`, `health/route.ts`, `cn`, `api.ts`, `fake-db.ts`, `env.ts`, `getDb`, `auth/index.ts`, `vitest`, `analytics/page.tsx`, `installation.test.ts`, `pure.ts`, `analytics.ts`, `analytics-page.test.tsx`, `analytics-maintenance.ts`, `queries.test.ts`, `bot/index.ts`, `retention.int.test.ts`, `isAuthConfigured`, `analytics.test.ts`, `bot-status.ts`, `permissions.ts`, `dashboard-page.test.tsx`, `tokens.test.ts`, `@testing-library/react`, `getDb`, `guild-select-form.tsx`?**
+  _High betweenness centrality (0.135) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `cn()` (e.g. with `Design system and UI` and `ADR-003: Next.js App Router, TypeScript strict, Tailwind v4, shadcn/ui`) actually correct?**
   _`cn()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `ADR-0021`, `RFC-9207`, `{ GET, POST }` to the rest of the system?**
   _3 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `hig-lookup.md` be split into smaller, more focused modules?**
-  _Cohesion score 0.05046979865771812 - nodes in this community are weakly interconnected._
-- **Why does `Live Activities` connect `Live Activities` to `hig-lookup.md`?**
+- **Should `pull-hig.mjs` be split into smaller, more focused modules?**
+  _Cohesion score 0.06308610400682012 - nodes in this community are weakly interconnected._
+- **Why does `Decisions` connect `Decisions` to `README.md`, `cn`, `select.ts`, `installation.ts`, `fake-db.ts`, `env.ts`, `demo.ts`, `activity/queries.ts`, `formatNumber`, `getDb`, `requireUser`, `isAuthConfigured`, `Button`?**
   _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Should `vitest` be split into smaller, more focused modules?**
-  _Cohesion score 0.1354723707664884 - nodes in this community are weakly interconnected._
-- **Why does `Typography` connect `Typography` to `hig-lookup.md`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Are the 5 inferred relationships involving `getDb()` (e.g. with `Database access` and `Database boundary`) actually correct?**
+  _`getDb()` has 5 INFERRED edges - model-reasoned connections that need verification._
+- **Should `Typography` be split into smaller, more focused modules?**
+  _Cohesion score 0.06060606060606061 - nodes in this community are weakly interconnected._

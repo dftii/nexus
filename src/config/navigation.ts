@@ -51,11 +51,11 @@ export const navigation: readonly NavItem[] = [
     label: "Analytics",
     href: "/analytics",
     icon: BarChart3,
-    status: "soon",
+    status: "available",
     phase: 4,
     description: "Deeper analytics computed from real server events.",
     planned: [
-      "Growth and retention over time",
+      "Daily messages and active authors",
       "Activity heatmaps by hour and weekday",
       "Most active channels",
     ],

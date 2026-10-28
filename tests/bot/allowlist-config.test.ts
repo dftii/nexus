@@ -69,6 +69,7 @@ describe("parseBotConfig", () => {
       databaseUrl: base.DATABASE_URL,
       allowlist: [G1, G2],
       heartbeatIntervalMs: 60_000,
+      retentionDays: 30,
     });
   });
 

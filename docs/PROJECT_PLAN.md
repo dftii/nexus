@@ -46,11 +46,29 @@ test plan in `src/bot/README.md`. Phase 3 is closed once that run passes.
 Still out of Phase 3: joins, leaves, voice and reactions; retention and
 aggregation; periodic permission re-verification; Settings content.
 
-## Phase 4 - Analytics from real data (next)
+## Phase 4 - Analytics from real data (implemented, pending live check)
 
-Replace dashboard demo data with queries over ingested events: growth,
-retention, activity heatmaps, top channels. Pre-aggregated rollups where
-needed.
+Daily rollups of the ingested events and the first real analytics page. The bot
+aggregates `message_events` into per-community and per-channel UTC-day tables
+(`community_daily_activity`, `channel_daily_activity`) and moves a per-community
+watermark (`analytics_finalized_through`): days up to it are read from the
+aggregates, later days from raw events, so nothing is counted twice. After a
+verified aggregation the bot deletes raw events older than
+`MESSAGE_EVENT_RETENTION_DAYS` (default 30, 30-365); the aggregates are kept.
+A scheduler runs both jobs every 15 minutes, and channel names are synced from
+the Gateway cache. `/analytics` shows KPIs, daily messages and distinct authors,
+a channel table, an hour x weekday heatmap (UTC) and recent events for 7, 30 or
+90 days; the Overview uses the same queries.
+
+Status: code, migration `20261030000000_analytics` and UI states are done, with
+mocked tests plus integration tests for a disposable PostgreSQL (`npm run
+test:db`). What was actually run, including the live bot against CAPTURAS, is
+recorded in [PROGRESS.md](PROGRESS.md). Phase 4 is closed once the live run
+passes.
+
+Out of Phase 4 on purpose: member growth, churn, joins and leaves, retention
+cohorts (they need the `GuildMembers` privileged intent), message content,
+encrypting stored Discord tokens, periodic permission re-verification.
 
 ## Phase 5 - Automations (rules)
 

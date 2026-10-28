@@ -15,21 +15,22 @@ import {
   formatNumber,
   formatShortDate,
 } from "@/lib/format";
-import type { MessagePoint } from "../types";
 
-const config = {
-  messages: { label: "Messages", color: "var(--chart-2)" },
-} satisfies ChartConfig;
-
-/** Messages per day as bars, zero-based. */
+/** One value per UTC day as bars, zero-based (messages by default). */
 export function MessageActivityChart({
   data,
   label,
+  dataKey = "messages",
+  color = "var(--chart-2)",
 }: {
-  data: readonly MessagePoint[];
+  data: readonly { date: string }[];
   /** Series name shown in the tooltip, e.g. "Messages (demo)". */
   label: string;
+  /** Which numeric field of each point to plot. */
+  dataKey?: string;
+  color?: string;
 }) {
+  const config = { [dataKey]: { label, color } } satisfies ChartConfig;
   if (data.length === 0) {
     return (
       <EmptyState
@@ -80,8 +81,8 @@ export function MessageActivityChart({
           }
         />
         <Bar
-          dataKey="messages"
-          fill="var(--color-messages)"
+          dataKey={dataKey}
+          fill={`var(--color-${dataKey})`}
           radius={[2, 2, 0, 0]}
           maxBarSize={20}
           isAnimationActive={false}

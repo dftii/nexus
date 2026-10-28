@@ -10,9 +10,9 @@ import {
 } from "@/config/navigation";
 
 describe("navigation config", () => {
-  it("has exactly one available item and it is the Overview at /", () => {
+  it("has exactly two available items: Overview at / and Analytics (Phase 4)", () => {
     const available = navigation.filter((item) => item.status === "available");
-    expect(available).toHaveLength(1);
+    expect(available.map((item) => item.href)).toEqual(["/", "/analytics"]);
     expect(available[0]).toMatchObject({ label: "Overview", href: "/" });
   });
 

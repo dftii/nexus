@@ -47,12 +47,12 @@ export function ActivityMetrics({
         <StatCard
           label="Last 7 days"
           value={formatNumber(summary.last7d)}
-          hint="Messages in the last 7 days"
+          hint="Today and the 6 previous UTC days"
         />
         <StatCard
           label="Active authors"
           value={formatNumber(summary.activeAuthors7d)}
-          hint="Distinct authors, last 7 days"
+          hint="Distinct authors, same 7 UTC days"
         />
       </div>
     </section>
@@ -89,7 +89,12 @@ export function RecentActivity({ items }: { items: RecentActivityItem[] }) {
                   </time>
                   <span className="flex flex-wrap items-center gap-x-6 gap-y-1 text-muted-foreground">
                     <span>
-                      Channel <Id value={item.channelId} />
+                      Channel{" "}
+                      {item.channelName ? (
+                        <span title={item.channelId}>#{item.channelName}</span>
+                      ) : (
+                        <Id value={item.channelId} />
+                      )}
                     </span>
                     <span>
                       Author <Id value={item.authorId} />

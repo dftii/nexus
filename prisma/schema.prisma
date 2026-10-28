@@ -52,26 +52,36 @@ model User {
 
 /// A Discord server (guild) registered in NEXUS.
 model Community {
-  id             String    @id @default(cuid())
-  discordGuildId String    @unique @map("discord_guild_id")
-  name           String
-  iconUrl        String?   @map("icon_url")
+  id                        String    @id @default(cuid())
+  discordGuildId            String    @unique @map("discord_guild_id")
+  name                      String
+  iconUrl                   String?   @map("icon_url")
   /// The NEXUS user who is the Discord owner of the guild, when known.
-  ownerId        String?   @map("owner_id")
+  ownerId                   String?   @map("owner_id")
   /// First time the Gateway confirmed the NEXUS bot is present in the guild for
   /// the current installation (= when activity collection started). Set by the
   /// bot process only; cleared when the bot is removed from the guild. Null =
   /// not installed.
-  botConnectedAt DateTime? @map("bot_connected_at")
+  botConnectedAt            DateTime? @map("bot_connected_at")
   /// Last bot heartbeat that included this guild. Its freshness decides
   /// online/offline (see src/lib/bot-status.ts).
-  botLastSeenAt  DateTime? @map("bot_last_seen_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  botLastSeenAt             DateTime? @map("bot_last_seen_at")
+  /// Phase 4 watermark: every UTC day up to and including this date has a
+  /// durable daily aggregate, and the dashboard reads those days from the
+  /// aggregate tables only. Days after it are read from raw `message_events`.
+  /// Null = nothing finalized yet (everything comes from raw events).
+  analyticsFinalizedThrough DateTime? @map("analytics_finalized_through") @db.Date
+  /// Last successful aggregation run for this community (bot process).
+  analyticsAggregatedAt     DateTime? @map("analytics_aggregated_at")
+  createdAt                 DateTime  @default(now()) @map("created_at")
+  updatedAt                 DateTime  @updatedAt @map("updated_at")
 
-  owner         User?                 @relation(fields: [ownerId], references: [id], onDelete: Restrict)
-  memberships   CommunityMembership[]
-  messageEvents MessageEvent[]
+  owner           User?                    @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  memberships     CommunityMembership[]
+  messageEvents   MessageEvent[]
+  dailyActivity   CommunityDailyActivity[]
+  channelActivity ChannelDailyActivity[]
+  channels        DiscordChannel[]
 
   @@index([ownerId])
   @@map("communities")
@@ -161,4 +171,60 @@ model MessageEvent {
   @@index([communityId, occurredAt])
   @@index([communityId, discordChannelId, occurredAt])
   @@map("message_events")
+}
+
+/// Phase 4: recorded messages of one community on one UTC calendar day,
+/// computed from `message_events` by the bot's maintenance job. Counts only:
+/// no author ids, no payloads. `authorCount` is distinct WITHIN that day; it
+/// must never be summed to get distinct authors over a longer range. Rows are
+/// kept indefinitely (raw-event retention does not apply to them).
+model CommunityDailyActivity {
+  communityId  String   @map("community_id")
+  /// UTC calendar date (00:00:00Z to 23:59:59.999Z).
+  day          DateTime @db.Date
+  messageCount Int      @map("message_count")
+  authorCount  Int      @map("author_count")
+  aggregatedAt DateTime @map("aggregated_at")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@id([communityId, day])
+  @@map("community_daily_activity")
+}
+
+/// Phase 4: the same daily aggregate split by channel. For a given community
+/// and day, `messageCount` over all its channels equals the community row.
+model ChannelDailyActivity {
+  communityId      String   @map("community_id")
+  day              DateTime @db.Date
+  discordChannelId String   @map("discord_channel_id")
+  messageCount     Int      @map("message_count")
+  authorCount      Int      @map("author_count")
+  aggregatedAt     DateTime @map("aggregated_at")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@id([communityId, day, discordChannelId])
+  @@map("channel_daily_activity")
+}
+
+/// Phase 4: display metadata for channels (and threads) of allowlisted guilds,
+/// maintained by the bot from the Guilds intent. Only labels: no permissions,
+/// no topic, no message data. Missing rows fall back to the channel id.
+model DiscordChannel {
+  discordChannelId String    @id @map("discord_channel_id")
+  communityId      String    @map("community_id")
+  discordGuildId   String    @map("discord_guild_id")
+  name             String
+  /// discord.js `ChannelType` numeric value.
+  type             Int
+  /// Set when Discord reports the channel deleted; the label is kept so old
+  /// analytics still read well.
+  deletedAt        DateTime? @map("deleted_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@index([communityId])
+  @@map("discord_channels")
 }

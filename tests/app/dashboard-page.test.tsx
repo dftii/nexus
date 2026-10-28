@@ -291,6 +291,33 @@ describe("/ (Overview)", () => {
     expect(row.textContent).not.toMatch(/content|text:|attachment/i);
   });
 
+  it("shows the channel name when it is known, with the id as a tooltip", async () => {
+    mocks.getOverviewData.mockResolvedValue(
+      data("online", {
+        recent: [
+          {
+            id: "e1",
+            occurredAt: new Date("2026-10-28T10:15:00.000Z"),
+            channelId: "222222222222222222",
+            channelName: "general",
+            authorId: "333333333333333333",
+          },
+        ],
+      }),
+    );
+    await renderPage();
+    const row = within(
+      screen.getByRole("region", { name: "Recent activity" }),
+    ).getByRole("listitem");
+    expect(within(row).getByText("#general")).toHaveAttribute(
+      "title",
+      "222222222222222222",
+    );
+    expect(
+      within(row).queryByText("222222222222222222"),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows an empty state before the first message", async () => {
     mocks.getOverviewData.mockResolvedValue(data("online"));
     await renderPage();

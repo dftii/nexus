@@ -1,3 +1,4 @@
+import { addUtcDays, startOfUtcDay } from "@/lib/utc-day";
 import type { Allowlist } from "./allowlist";
 import {
   createBatchWriter,
@@ -35,12 +36,21 @@ export function createIngestion(deps: {
   allowlist: Allowlist;
   cache: CommunityCache;
   logger: Logger;
+  /** Raw retention: events older than this many UTC days are refused. */
+  retentionDays?: number;
+  now?: () => Date;
   writerOptions?: Partial<
     Omit<BatchWriterOptions, "insert" | "logger" | "onFlush">
   >;
 }): Ingestion {
   const { repository, allowlist, cache, logger } = deps;
   const rejections = createRejectionCounter();
+  const now = deps.now ?? (() => new Date());
+  const { retentionDays } = deps;
+  const oldestAccepted =
+    retentionDays === undefined
+      ? undefined
+      : () => addUtcDays(startOfUtcDay(now()), -retentionDays);
 
   const writer = createBatchWriter({
     ...deps.writerOptions,
@@ -64,6 +74,7 @@ export function createIngestion(deps: {
         const result = classifyMessage(extractMessageDto(message), {
           allowlist,
           cache,
+          oldestAccepted,
         });
         if (result.accepted) writer.enqueue(result.record);
         else rejections.add(result.reason);

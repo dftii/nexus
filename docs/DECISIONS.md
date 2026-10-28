@@ -656,3 +656,185 @@ day }`. The `session` callback builds the session from scratch from three
     `botStatus`; `botConnected` stays as `botStatus !== "not_installed"`).
 - **Consequence:** the figures are real but modest; totals also include events
   from a previous installation of the bot (history is kept on removal).
+
+<a id="adr-032"></a>
+
+## ADR-032: Daily aggregates, UTC days and a per-community watermark
+
+- **Context:** Phase 4 needs history longer than the raw `message_events` can be
+  kept, without ever counting a message twice or losing it.
+- **Decision:**
+  - Two additive tables, both keyed by UTC calendar day (`DATE`):
+    `community_daily_activity (community_id, day, message_count, author_count,
+aggregated_at)` and `channel_daily_activity` (the same plus
+    `discord_channel_id`). `CHECK` constraints: counts >= 0 and `author_count <=
+message_count`. Counts only, no author ids. `author_count` is distinct
+    **within the day**; it is never summed to get distinct authors over a range.
+  - `communities.analytics_finalized_through` is the watermark **W** (a `DATE`,
+    null = nothing finalized) and `communities.analytics_aggregated_at` is the last
+    successful aggregation. Only the bot writes both.
+  - The calculation rule, used by every read: days **<= W** come only from the
+    aggregate tables, days **> W** (today included) only from raw events. All-time
+    messages = `SUM(community_daily_activity.message_count WHERE day <= W)` + `COUNT(raw
+WHERE occurred_at >= (W + 1 day) 00:00Z)`. A day is never read from both
+    sources, so the figure is identical before and after the watermark moves.
+  - UTC everywhere (`src/lib/utc-day.ts`): `message_events.occurred_at` is a
+    `timestamp` that holds UTC, so the UTC day in SQL is `occurred_at::date`. Today
+    is never finalized.
+  - Aggregate rows are kept indefinitely; no code deletes them. Only days that
+    have raw events get a row (no zero rows are written).
+- **Consequence:** the dashboard stays correct while aggregation lags (days after W
+  are read raw), and retention (ADR-034) can delete raw rows of finalized days
+  without changing any total. Zero-filling for charts happens in the UI only.
+  Migration `20261030000000_analytics` is additive.
+
+<a id="adr-033"></a>
+
+## ADR-033: Aggregation job: one transaction, advisory lock, late events
+
+- **Decision:** `createAggregationService` (`src/bot/services/aggregation.ts`)
+  aggregates one community per call, in **one transaction** that starts with
+  `pg_advisory_xact_lock(hashtext('nexus:analytics:' || communityId))`. The lock
+  serialises concurrent runs, also across processes, and is shared with retention.
+  W is read after the lock is taken.
+  - Days recomputed = (a) every day from W + 1 (or the earliest raw day when W is
+    null) through yesterday, which covers catch-up after downtime and the first
+    backfill, plus (b) days <= W that received events whose `created_at` is later
+    than the previous `analytics_aggregated_at` minus 10 minutes (the margin
+    covers in-flight inserts). Part (b) is limited to days >= the retention cutoff:
+    an older day may be partly purged, and recomputing it could overwrite a valid
+    aggregate with a smaller one. Catch-up days (a) are not limited by the cutoff.
+  - The recompute is one statement per run (a CTE inserting channel rows, then
+    the community rows) with `GROUP BY` / `COUNT(DISTINCT)` in PostgreSQL and
+    `ON CONFLICT DO UPDATE`. Nothing is loaded into memory, one snapshot keeps the
+    channel rows and the community row of a day consistent, and a retry is
+    idempotent. Then `analytics_finalized_through = max(W, yesterday)` and
+    `analytics_aggregated_at = now`. A failed transaction changes nothing.
+  - Dates travel as ISO strings cast to `timestamp` in SQL, so the `Z` suffix is
+    ignored on purpose (the column holds UTC).
+- **Consequence:** a re-run, two concurrent runs and a crash in the middle all
+  converge to the same rows. Known edge: an event for a day that crosses the
+  retention cutoff, accepted before midnight UTC and flushed after, makes that day
+  impossible to recompute (see ADR-034).
+
+<a id="adr-034"></a>
+
+## ADR-034: Raw-event retention with verified deletion
+
+- **Decision:** `createRetentionService` (`src/bot/services/retention.ts`)
+  deletes raw `message_events` of a community only after the bot has aggregated
+  that community successfully in the same pass.
+  - `MESSAGE_EVENT_RETENTION_DAYS`: default 30, minimum 30, maximum 365, validated
+    by hand in `src/bot/config.ts` like `BOT_HEARTBEAT_INTERVAL_MS` (not Zod). The
+    30-day floor is what the web's 7/30-day raw-only reads rely on.
+  - Deletable = `occurred_at < min(today - retentionDays, (W + 1 day))`, all at
+    00:00Z. With no watermark nothing is deleted; today is never deleted.
+  - Verification per deletable UTC day: the community aggregate row exists, the raw
+    count is **<=** the aggregate count (not equal: bounded batches can leave a day
+    partially deleted between runs, and more raw rows than the aggregate means the
+    aggregate is stale), and the channel rows add up **exactly** to the community
+    row. Any failing day: nothing is deleted for that community, a
+    `retention_skipped` warning is logged (counts only, no ids) and raw data stays.
+  - Verification and deletion run in one transaction under the same advisory lock
+    as aggregation, so the two can never interleave. Deletes are batches of 5000,
+    at most 20 per run, resumable on the next run. Communities, memberships and
+    aggregate rows are never deleted.
+  - Ingestion refuses events older than the cutoff (rejection reason `too_old`),
+    so a day that was already purged cannot get a late raw row.
+- **Consequence:** data is never lost because of a wrong or missing aggregate; the
+  failure mode is keeping more raw data. Known edge: an event for a day that
+  crosses the cutoff, accepted before midnight UTC and flushed after, can make that
+  day un-recomputable, so retention logs `retention_skipped` for that community
+  until someone fixes it by hand. The data is kept in the meantime.
+
+<a id="adr-035"></a>
+
+## ADR-035: Scheduler for the analytics jobs
+
+- **Decision:** `createAnalyticsMaintenance`
+  (`src/bot/services/analytics-maintenance.ts`) is started from the ready handler
+  after the installation reconcile. It runs a catch-up pass at once, then every 15
+  minutes (`setInterval`, unref'd). It is single-flight: a tick that overlaps a
+  running pass is skipped. Each pass first runs the `beforeRun` hook (the channel
+  sync, ADR-036; a failure only logs), then, for each community in the bot's
+  cache, aggregation and then retention. A failure for one community is logged
+  (`analytics_community_failed`, with the stage) and does not stop the others;
+  retention is skipped for a community whose aggregation failed.
+- On shutdown `stop(10 s)` clears the timer and awaits the run in flight (it
+  finishes its current community; none starts afterwards), before the message
+  buffer is flushed.
+- Only the bot process aggregates or deletes. Nothing destructive runs in Next.js
+  or at build time. Logs carry counts and community ids, never author ids.
+- **Consequence:** no new infrastructure (no queue, no cron). With several bot
+  processes the advisory lock keeps runs correct; running them is not a supported
+  setup yet.
+
+<a id="adr-036"></a>
+
+## ADR-036: Channel names from the Gateway cache
+
+- **Decision:** `discord_channels (discord_channel_id PK, community_id,
+discord_guild_id, name, type, deleted_at, updated_at)` stores labels only. The
+  bot fills it from the guild cache that the existing `Guilds` intent already
+  provides: text, announcement, voice and stage channels and threads, no
+  categories or forums. `syncAll` runs at the start of every maintenance pass
+  (which also heals missed events); `guildCreate` syncs one guild; channel and
+  thread create/update upsert, delete sets `deleted_at` and keeps the name. No
+  REST calls, no new intents, failures only log.
+- The web resolves names from this table, scoped to the community, and falls back
+  to the channel id when there is no row.
+- **Consequence:** intents stay exactly `Guilds` + `GuildMessages`. A channel the
+  bot has never seen shows its id. `GuildMembers`, joins/leaves and message content
+  remain out of scope.
+
+<a id="adr-037"></a>
+
+## ADR-037: Analytics read side and `/analytics`
+
+- **Decision:** one set of functions (`src/server/activity/queries.ts`, pure
+  helpers in `pure.ts`, the shared loader in `context.ts`) serves both Overview
+  and `/analytics`. The community comes only from `getActiveCommunity(userId)`; the
+  page reads `?range=7|30|90` (Zod, default 30, anything else becomes 30).
+  - All-time messages follow the ADR-032 rule. **Last 24 hours** = raw events with
+    `occurred_at > now - 24 h` (exclusive). **Last 7 days** = today plus the 6
+    previous UTC days (hybrid count). **Active authors (7 days)** = exact
+    `COUNT(DISTINCT)` on raw over those same 7 days.
+  - Daily series: per day from the aggregate when day <= W, from raw otherwise,
+    zero-filled **in the UI only**. Channel breakdown: hybrid counts with share %;
+    per-channel distinct authors are exact (raw) for 7 and 30 days and `null`
+    ("-") for 90, because daily author counts cannot be added. Hour-of-day x
+    weekday heatmap: raw only, UTC, Monday first, capped at 30 days.
+  - Staleness note: after 01:00 UTC when W is older than yesterday, or when W or
+    `aggregatedAt` is null while raw events older than today exist. The numbers stay
+    correct meanwhile, because days after W are read raw.
+  - Raw timestamp parameters on the web side rely on the database session time zone
+    being UTC (the Docker default); the bot casts ISO strings explicitly.
+  - Page: KPIs, daily messages and daily distinct-author charts (the demo's
+    `MessageActivityChart` generalised with `dataKey` / `color`; `/demo` is
+    unchanged and still synthetic), channel table, heatmap, 25 recent events with
+    channel names, a coverage panel and the states not installed, offline, stale,
+    empty, error and loading. Copy says the figures are recorded activity, not the
+    full Discord history, that a zero day may mean the bot was offline, and that
+    times are UTC. Analytics is `available` in the sidebar; Overview keeps its
+    layout and uses the same functions (ADR-031 still describes its states).
+- **Consequence:** the two pages cannot disagree. Explicitly **not** built: member
+  growth, churn, joins/leaves, retention cohorts. They need the `GuildMembers`
+  privileged intent and are a later decision.
+
+<a id="adr-038"></a>
+
+## ADR-038: Integration tests against a disposable PostgreSQL database
+
+- **Decision:** SQL-heavy code (aggregation, retention, the raw queries, channel
+  upserts) is tested against a real PostgreSQL. `tests/integration/*.int.test.ts`
+  use `tests/helpers/test-db.ts`: the URL is `TEST_DATABASE_URL`, or `DATABASE_URL`
+  with the database name replaced by `nexus_test` (never the dev database). Each
+  suite is wrapped in `describe.skipIf(!hasTestDatabase)` and empties the tables
+  with `TRUNCATE ... CASCADE` before every test. `npm run test:db` loads `.env`
+  and runs only that folder, without file parallelism. Plain `npm test` does not load
+  `.env`, so the suites skip and it still needs no database (if `DATABASE_URL` is
+  exported in the shell they run, and fail when `nexus_test` does not exist or is
+  not migrated).
+- **Consequence:** the in-memory fake of the Prisma client stays for unit tests;
+  the integration suite is the only check that the SQL itself is right. Setup is
+  documented in [PROGRESS.md](PROGRESS.md) (Phase 4).

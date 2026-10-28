@@ -4,18 +4,21 @@ NEXUS is a community management and analytics platform for Discord servers:
 insights about growth and engagement, automations, and moderation tooling in
 one dashboard.
 
-> **Status: Phase 3 - Discord bot and real activity (implemented, live check
+> **Status: Phase 4 - Analytics from real events (implemented, live check
 > pending).** You can sign in with Discord, select a server you manage, invite
 > the NEXUS bot to it and run the bot as a second process. The Overview shows the
-> bot status (not installed / offline / online) and **real** message metrics
-> (counts, active authors, recent activity) built only from message metadata the
-> bot stores; message text is never read. The public **demo** at `/demo` is the
-> only dashboard with generated sample data and says so. Phase 4 (analytics from
-> real events) is next. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) and
+> bot status (not installed / offline / online) and **real** message metrics, and
+> `/analytics` shows daily messages and active authors, a channel table and an
+> hour x weekday heatmap for 7, 30 or 90 days. Everything is built only from
+> message metadata the bot stores; message text is never read. The bot rolls the
+> events up into daily totals and deletes raw events past the retention window
+> only after those totals are verified. The public **demo** at `/demo` is the
+> only dashboard with generated sample data and says so. Phase 5 (automations) is
+> next. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) and
 > [docs/PROGRESS.md](docs/PROGRESS.md) for exactly what has and has not been
-> verified: agents never started the live bot, so the Gateway, heartbeat and
-> invite flow against a real server still need a manual check
-> ([bot test plan](src/bot/README.md#manual-test-plan-server-capturas)).
+> verified: agents never start the live bot, so the aggregation, retention and
+> analytics page against a real server still need the manual check described in
+> the [bot README](src/bot/README.md#analytics-maintenance-phase-4).
 
 ## Stack
 
@@ -101,6 +104,7 @@ Copy `.env.example` to `.env`. `.env` is gitignored; never commit secrets.
 | `DISCORD_BOT_TOKEN`                                   | For bot  | Bot process only            | Developer Portal -> Bot -> Reset Token. The web app never reads it.                                     |
 | `DISCORD_GUILD_ALLOWLIST`                             | For bot  | Bot process only            | Comma-separated server ids the bot may process. Empty: the bot stores nothing.                          |
 | `BOT_HEARTBEAT_INTERVAL_MS`                           | No       | Bot process only            | Heartbeat period in ms (default `60000`, 5000-120000). The web shows "offline" after 3 minutes.         |
+| `MESSAGE_EVENT_RETENTION_DAYS`                        | No       | Bot process only            | Days of raw message events kept (default `30`, 30-365). Daily totals are kept; see Analytics below.     |
 
 Sign-in counts as configured only when `AUTH_SECRET`, `AUTH_DISCORD_ID` and
 `AUTH_DISCORD_SECRET` are all set. Auth.js trusts the host automatically in
@@ -116,6 +120,7 @@ needs neither `AUTH_URL` nor `AUTH_TRUST_HOST`.
 | `npm run typecheck`                         | `tsc --noEmit`                                           |
 | `npm run format` / `format:check`           | Prettier (with Tailwind class sorting)                   |
 | `npm test` / `test:watch` / `test:coverage` | Vitest                                                   |
+| `npm run test:db`                           | Integration tests against the disposable `nexus_test` DB |
 | `npm run check`                             | lint + typecheck + test (run before pushing)             |
 | `npm run bot:dev`                           | Run the Discord bot with `tsx watch` (restarts on edits) |
 | `npm run bot:start`                         | Run the Discord bot with `tsx` (no watch)                |
@@ -143,12 +148,42 @@ stores only message id, channel id, author id and timestamp; see
 [src/bot/README.md](src/bot/README.md) for exactly what is and is not collected,
 troubleshooting and the manual test plan.
 
+## Analytics
+
+Phase 4 turns the stored events into daily numbers. The bot process (nothing
+else) does two jobs for every allowlisted community, once at start and then every
+15 minutes:
+
+1. **Aggregation:** counts messages and distinct authors per UTC day, in total and
+   per channel, into `community_daily_activity` and `channel_daily_activity`, and
+   moves the community's watermark `analytics_finalized_through`. Today is never
+   finalized.
+2. **Retention:** after a successful aggregation, deletes raw `message_events`
+   older than `MESSAGE_EVENT_RETENTION_DAYS` (default 30, at most 365), but only
+   for days whose aggregate matches the raw rows. If anything does not match,
+   nothing is deleted and `retention_skipped` is logged. Daily totals are never
+   deleted.
+
+The web reads days up to the watermark from the daily totals and later days from
+the raw events, so a day is never counted twice and the numbers stay correct while
+aggregation lags. All days and times are **UTC**. `/analytics?range=7|30|90`
+(default 30) shows KPIs, two daily charts, a channel table, the heatmap (raw
+events, at most 30 days) and the 25 latest events; per-channel distinct authors
+are exact for 7 and 30 days and shown as "-" for 90. Channel names come from the
+Gateway cache (no extra intent or REST call) and fall back to the id. The page
+says it shows recorded activity, not the full Discord history: a day with zero
+messages may mean the bot was offline. Decisions: ADR-032 to ADR-038 in
+[docs/DECISIONS.md](docs/DECISIONS.md#adr-032); bot details in
+[src/bot/README.md](src/bot/README.md#analytics-maintenance-phase-4).
+
 ## Database
 
 PostgreSQL runs through `docker-compose.yml` (`postgres:17-alpine`, named
 volume, healthcheck). Models: `User`, `Account` and `Session` (Auth.js),
-`Community` and `CommunityMembership`, and `MessageEvent` (bot activity); see
-[docs/DECISIONS.md](docs/DECISIONS.md#adr-018) for the schema decisions.
+`Community` and `CommunityMembership`, `MessageEvent` (bot activity) and the
+Phase 4 tables `CommunityDailyActivity`, `ChannelDailyActivity` and
+`DiscordChannel`; see [docs/DECISIONS.md](docs/DECISIONS.md#adr-018) and
+[ADR-032](docs/DECISIONS.md#adr-032) for the schema decisions.
 
 ```bash
 npm run db:up                 # start PostgreSQL
@@ -156,21 +191,23 @@ npm run db:deploy             # apply committed migrations (safe: never resets)
 npx prisma migrate status     # "Database schema is up to date!" when in sync
 ```
 
-There are three migrations: `20261028000000_init`, `20261028120000_auth` and
-`20261029000000_bot_activity` (all additive). Use `db:deploy` to apply them. `db:migrate` (`prisma migrate dev`)
+There are four migrations: `20261028000000_init`, `20261028120000_auth`,
+`20261029000000_bot_activity` and `20261030000000_analytics` (all additive). Use
+`db:deploy` to apply them. `db:migrate` (`prisma migrate dev`)
 is for creating a new migration while developing and may offer to reset a
 database that has drifted: read its prompt before answering.
 
 ## Routes
 
-| Route                                                                    | Access    | What it is                                                                             |
-| ------------------------------------------------------------------------ | --------- | -------------------------------------------------------------------------------------- |
-| `/login`                                                                 | Public    | Sign in with Discord; explains the scopes; link to the demo.                           |
-| `/demo`                                                                  | Public    | The sample-data dashboard (labelled "Demo data").                                      |
-| `/api/health`, `/api/ready`, `/api/auth/*`                               | Public    | Liveness, readiness, Auth.js endpoints.                                                |
-| `/`                                                                      | Signed in | Bot status and real activity of your selected server (or a redirect to `/onboarding`). |
-| `/onboarding`                                                            | Signed in | Pick the server to manage.                                                             |
-| `/analytics`, `/automations`, `/moderation`, `/leaderboard`, `/settings` | Signed in | "Coming soon" pages naming the phase that delivers them.                               |
+| Route                                                      | Access    | What it is                                                                             |
+| ---------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `/login`                                                   | Public    | Sign in with Discord; explains the scopes; link to the demo.                           |
+| `/demo`                                                    | Public    | The sample-data dashboard (labelled "Demo data").                                      |
+| `/api/health`, `/api/ready`, `/api/auth/*`                 | Public    | Liveness, readiness, Auth.js endpoints.                                                |
+| `/`                                                        | Signed in | Bot status and real activity of your selected server (or a redirect to `/onboarding`). |
+| `/onboarding`                                              | Signed in | Pick the server to manage.                                                             |
+| `/analytics`                                               | Signed in | Real analytics of your selected server; `?range=7`, `30` or `90`.                      |
+| `/automations`, `/moderation`, `/leaderboard`, `/settings` | Signed in | "Coming soon" pages naming the phase that delivers them.                               |
 
 Authorization is always checked on the server (`requireUser()` in each page and
 action); see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#authentication-and-authorization).
@@ -190,6 +227,22 @@ network. Component tests use jsdom and Testing Library; a test file opts in with
 `// @vitest-environment jsdom` on its first line (the default environment is
 Node).
 
+The SQL (aggregation, retention, the raw queries, channel upserts) is also tested
+against a real PostgreSQL. `npm run test:db` runs `tests/integration/*.int.test.ts`
+against a disposable database `nexus_test`, never the dev database (its name
+replaces the one in `DATABASE_URL`, or set `TEST_DATABASE_URL`). Create it once
+inside the Compose container, then apply the migrations to it:
+
+```bash
+docker exec nexus-postgres psql -U nexus -d nexus -c "CREATE DATABASE nexus_test"
+# DATABASE_URL pointing at nexus_test (same user, password and port):
+DATABASE_URL="postgresql://<user>:<password>@localhost:<port>/nexus_test" npx prisma migrate deploy
+npm run test:db
+```
+
+Adjust user, password and port to your `.env`. Without the database these suites
+skip: plain `npm test` still needs no PostgreSQL.
+
 ## Design system
 
 Dark-first, premium gaming look: near-black canvas, charcoal surfaces in
@@ -208,8 +261,8 @@ avatar, chart, dropdown-menu. Details:
 `src/app/(app)/layout.tsx` wraps every page in the shell: skip link, fixed
 sidebar (from `lg`), header (page title, the demo-data indicator on `/demo`
 only, the account menu or a "Sign in" link, drawer menu button below `lg`) and
-the `main` landmark. The nav comes from `src/config/navigation.ts`; only
-Overview is available, the other sections are `status: "soon"` and render an
+the `main` landmark. The nav comes from `src/config/navigation.ts`; Overview and
+Analytics are available, the other sections are `status: "soon"` and render an
 honest "Coming soon" page naming the roadmap phase that delivers them. On
 `/demo` the Overview link points at `/demo`.
 
@@ -227,6 +280,12 @@ a real community: `/` renders only real bot data (or the install steps).
 **Port 5432 is already in use** (`npm run db:up` fails to bind). Another
 PostgreSQL is running. Set `POSTGRES_PORT=5433` in `.env` and change the port in
 `DATABASE_URL` to match, then `npm run db:up` again.
+
+**A page shows "We couldn't load this community's activity" right after a new
+migration.** A `npm run dev` started before `prisma generate` keeps the old
+Prisma client in memory (it is cached on `globalThis` across hot reloads), and
+that client does not know the new tables or columns. Restart `npm run dev` (and
+the bot) after every migration.
 
 **`SELF_SIGNED_CERT_IN_CHAIN` (or `unable to get local issuer certificate`)
 when signing in or listing servers.** Something between your machine and
@@ -256,14 +315,22 @@ authorization expired or was revoked. Use the button to sign in again.
 
 ## Current limitations
 
-- The bot (Phase 3, `src/bot/`) records message metadata only. Joins, leaves,
-  voice and reactions are not collected, and analytics beyond the Overview
-  counts (Phase 4), automation, moderation and XP do not exist yet.
+- The bot (`src/bot/`) records message metadata only. Joins, leaves, voice and
+  reactions are not collected, so there is no member growth, churn or retention
+  cohort analytics; automation, moderation and XP do not exist yet.
 - The live bot has not been started by any automated check: the Gateway
-  connection, heartbeat and invite flow against a real server are pending a
-  manual run (see the bot README).
-- The Overview counts everything stored for the community, including events
-  from an earlier installation if the bot was removed and added again.
+  connection, heartbeat, invite flow, daily aggregation and retention against a
+  real server are pending a manual run (see the bot README and
+  [docs/PROGRESS.md](docs/PROGRESS.md)).
+- Analytics show recorded activity only: messages sent while the bot was
+  installed and running. A zero day may mean the bot was offline.
+- Totals include everything stored for the community, including events from an
+  earlier installation if the bot was removed and added again.
+- Raw events older than the retention window are deleted by the bot; only the
+  daily totals survive. Distinct authors over a range are not available beyond 30
+  days, and the heatmap covers at most 30 days.
+- The web side assumes the database session time zone is UTC (the Docker default)
+  for raw timestamp comparisons.
 - The real Discord round trip (consent, callback, token exchange, guild list,
   token refresh) has not been exercised against Discord; it is covered by tests
   with mocked responses only. See [docs/PROGRESS.md](docs/PROGRESS.md).

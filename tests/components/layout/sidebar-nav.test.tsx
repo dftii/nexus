@@ -28,8 +28,10 @@ describe("SidebarNav", () => {
 
     const overview = screen.getByRole("link", { name: "Overview" });
     expect(within(overview).queryByText("Soon")).not.toBeInTheDocument();
-    const analytics = screen.getByRole("link", { name: /Analytics/ });
-    expect(within(analytics).getByText("Soon")).toBeInTheDocument();
+    const analytics = screen.getByRole("link", { name: "Analytics" });
+    expect(within(analytics).queryByText("Soon")).not.toBeInTheDocument();
+    const automations = screen.getByRole("link", { name: /Automations/ });
+    expect(within(automations).getByText("Soon")).toBeInTheDocument();
   });
 
   it("marks only the current page with aria-current", () => {

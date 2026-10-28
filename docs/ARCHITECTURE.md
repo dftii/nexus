@@ -9,8 +9,8 @@ Discord bot process that share the same database.
 src/
   app/            Routes only (thin). Pages, layouts, route handlers.
     (app)/        Route group with the app shell layout
-      (protected)/  Signed-in pages: / (Overview), /onboarding, and the
-                    placeholder pages for sections that are not built
+      (protected)/  Signed-in pages: / (Overview), /analytics, /onboarding,
+                    and the placeholder pages for sections that are not built
       demo/         Public demo dashboard (sample data)
     login/        Public sign-in page
     api/auth/     Auth.js route handlers
@@ -27,8 +27,8 @@ src/
   server/auth/    Auth.js config, current-user helpers. server-only.
   server/discord/ Discord API client, token refresh, eligibility. server-only.
   server/communities/  Tenant-isolated community reads, selection, active cookie.
-  server/activity/     Read side of the bot's data: activity summary, recent
-                       events, the Overview loader. server-only.
+  server/activity/     Read side of the bot's data: the hybrid message queries,
+                       the Overview and Analytics loaders. server-only.
   config/         Static app config (site name, nav, ...)
   generated/      Prisma client output. Gitignored; created by `prisma generate`.
   bot/            Discord bot process (own entrypoint, not part of Next.js)
@@ -61,6 +61,7 @@ Browser -> Next.js route (src/app) -> [feature code] -> server/* -> getDb() -> P
 
 Discord Gateway -> bot handlers -> bot services -> batch writer -> PostgreSQL
                                        \-> heartbeat / installation -> communities
+                                       \-> aggregation / retention (every 15 min)
 ```
 
 Signed-in pages read the session, memberships and (onboarding only) Discord. The
@@ -196,8 +197,8 @@ There is no `proxy.ts` (ADR-016): a proxy cannot check a database session withou
 a round trip per request, and a cookie-presence check would only be UX.
 
 - Public: `/login`, `/demo`, `/api/health`, `/api/ready`, `/api/auth/*`.
-- Protected: everything in `src/app/(app)/(protected)/` (`/`, `/onboarding`, the
-  five coming-soon pages). The group layout calls `requireUser()` as a first gate,
+- Protected: everything in `src/app/(app)/(protected)/` (`/`, `/analytics`,
+  `/onboarding`, the four coming-soon pages). The group layout calls `requireUser()` as a first gate,
   but layouts are not re-rendered on client navigation, so **every protected page
   and every server action calls `requireUser()` itself**. When auth is not
   configured, `requireUser()` redirects to `/login?error=Configuration` (fail
@@ -215,10 +216,10 @@ is the only route that renders demo figures: `getDashboardData()` always returns
 `source: "demo"`, the `DemoBanner` is part of that view, and `DemoIndicator`
 (header badge) shows only when the pathname is `/demo` (ADR-022). A real
 community's Overview (`CommunityOverview`) never receives or renders demo data; a
-unit test asserts it contains no numbers and no "Demo data" text. Live data
-arrives in Phase 4 for the real community's own page, not by pointing `/` at
-demo data. Since Phase 3 the Overview shows real bot status and message counts
-from the bot's own tables; those are real, never demo.
+unit test asserts it contains no numbers and no "Demo data" text. Since Phase 3
+the Overview shows real bot status and message counts from the bot's own tables,
+and since Phase 4 `/analytics` shows real daily analytics; those are real, never
+demo.
 
 ## Discord bot process
 
@@ -238,6 +239,13 @@ Discord Gateway (intents Guilds + GuildMessages)
   -> PostgreSQL   message_events, communities.bot_connected_at / bot_last_seen_at
   -> src/server/activity (server-only)   counts, distinct authors, recent events
   -> Overview page (server component) -> CommunityOverview
+
+bot maintenance (Phase 4, every 15 min, see "Analytics pipeline")
+  message_events -> aggregation -> community_daily_activity / channel_daily_activity
+                                   + communities.analytics_finalized_through (W)
+                 -> retention (verified) -> deletes old raw rows
+  Guilds cache   -> channel sync -> discord_channels (labels)
+  -> src/server/activity (hybrid reads) -> /analytics and Overview
 ```
 
 Metadata only: message id, guild id, channel id, author id and timestamp are
@@ -272,6 +280,76 @@ The Overview loader (`getOverviewData`, ADR-031) obtains the community only from
 `getActiveCommunity(userId)`, then runs activity queries scoped to that id. A
 browser-supplied community id is never used. Database errors become a typed
 error state rendered by the page.
+
+### Analytics pipeline
+
+Phase 4 (ADR-032 to ADR-038). Two bot-side jobs and one read side, joined only by
+the database. The central rule: with W = `communities.analytics_finalized_through`
+(a UTC date, null = nothing finalized), days **<= W** are read **only** from the
+aggregate tables and days **> W** (today included) **only** from raw
+`message_events`. A day is never counted from both, so totals do not change when
+W moves or when retention deletes raw rows of finalized days.
+
+```mermaid
+flowchart LR
+  G[Gateway cache] -->|labels| CH[(discord_channels)]
+  GW[messageCreate] -->|reject older than the cutoff: too_old| RAW[(message_events)]
+  RAW --> AGG[aggregation]
+  AGG --> DA[(community_daily_activity)]
+  AGG --> CA[(channel_daily_activity)]
+  AGG -->|moves| W[communities.analytics_finalized_through]
+  DA --> RET[retention: verify, then delete]
+  CA --> RET
+  RET -->|deletes old rows| RAW
+  DA -->|days <= W| WEB[server/activity]
+  CA -->|days <= W| WEB
+  RAW -->|days > W| WEB
+  CH -->|names| WEB
+  WEB --> P["/analytics and Overview"]
+```
+
+| Module (bot)                                       | Responsibility                                                                                                               |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `services/aggregation.ts`                          | One transaction per community under `pg_advisory_xact_lock`; catch-up after W, late-event recompute; upserts; moves W.       |
+| `services/retention.ts`                            | Verify each deletable day, then delete in batches of 5000 (max 20 per run), same lock and transaction.                       |
+| `services/analytics-maintenance.ts`                | Scheduler: `beforeRun` hook, then aggregation and retention per community; single-flight; `stop()` awaits the run in flight. |
+| `services/channel-sync.ts`, `handlers/channels.ts` | `discord_channels` labels from the Gateway cache; channel and thread lifecycle events. No REST, no new intents.              |
+
+Aggregation and retention are deliberately in the bot process: it is the only
+writer, and nothing destructive runs in Next.js or at build time. Both take the
+same advisory lock (`hashtext('nexus:analytics:' || communityId)`), so they can
+never interleave. Retention deletes only `occurred_at < min(today - retentionDays,
+W + 1 day)` and only when each such day's aggregate exists, is at least the raw
+count and its channel rows add up exactly to it (otherwise `retention_skipped`);
+ingestion refuses events older than the cutoff (`too_old`). Known edge: an event
+for a day crossing the cutoff, accepted before midnight UTC and flushed after,
+makes that day un-recomputable; retention keeps the data and keeps logging
+`retention_skipped` for the community until it is fixed manually.
+
+Read side (`src/server/activity`): `context.ts` (`loadActivity`: community from
+`getActiveCommunity` only, bot status, W; skipped while the bot is not installed;
+failures become `{ status: "error" }`), `queries.ts` (the SQL), `pure.ts` (merge,
+share, heatmap grid and staleness helpers with no I/O), `analytics.ts` and
+`overview.ts` (the two loaders). The UI is `src/features/analytics`; the route
+`/analytics` validates `?range=7|30|90` with Zod (`src/lib/analytics-range.ts`).
+
+| Metric                       | Definition                                                                                            |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| All-time messages            | `SUM(aggregates, day <= W)` + raw count since `W + 1 day` 00:00Z                                      |
+| Last 24 hours                | raw `occurred_at > now - 24 h` (exclusive)                                                            |
+| Last 7 days                  | today plus the 6 previous UTC days, hybrid count                                                      |
+| Active authors (7 days)      | exact `COUNT(DISTINCT)` on raw over those 7 calendar days                                             |
+| Daily series                 | per day from the aggregate if day <= W, else from raw; zero-filled in the UI only                     |
+| Channel breakdown            | hybrid counts and share %; names from `discord_channels`, id as fallback                              |
+| Distinct authors per channel | exact (raw) for 7 and 30 days; `null` ("-") for 90, because daily author counts cannot be added       |
+| Heatmap                      | raw only, UTC, Monday first, at most 30 days                                                          |
+| Stale note                   | after 01:00 UTC, W older than yesterday, or W / `aggregatedAt` null while raw older than today exists |
+
+Numbers stay correct while stale, because days after W are read raw. Raw
+timestamp parameters on the web side rely on the database session time zone being
+UTC (the Docker default); the bot casts ISO strings to `timestamp` explicitly.
+`MessageActivityChart` is shared with the demo through `dataKey` / `color` props;
+`/demo` still renders only synthetic data.
 
 ### Invite link
 
@@ -376,9 +454,9 @@ Shared UI lives in `src/components/common`: `StatCard`, `ChartCard`,
 - `data/demo.ts` - `buildDemoDashboardData()`: pure and deterministic. Uses a
   seeded mulberry32 PRNG and a fixed reference date (`DEMO_END_DATE`), never
   `Date.now` or `Math.random`, so SSR, hydration and tests agree.
-- `data/index.ts` - `getDashboardData()`: the only function the page calls.
-  Phase 4 swaps its body for queries over ingested events and returns the same
-  shape with `source: "live"`.
+- `data/index.ts` - `getDashboardData()`: the only function the page calls. It
+  still always returns demo data; the real analytics of Phase 4 do not go through
+  it (see "Analytics pipeline").
 - `lib/` - PRNG, delta math (`computeDelta`), chart helpers.
 - `components/` - `DashboardView` (layout), `SummaryStats`, `GrowthCard`,
   `MessagesCard`, `ActivityFeed`, `DemoBanner`, `DashboardSkeleton`, and the

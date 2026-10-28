@@ -21,6 +21,7 @@ vi.mock("@/server/activity/queries", () => ({
 import { getOverviewData } from "@/server/activity/overview";
 
 const NOW = new Date("2026-10-29T12:00:00.000Z");
+const W = new Date("2026-10-28T00:00:00.000Z");
 const SUMMARY = {
   totalEvents: 3,
   last24h: 2,
@@ -46,6 +47,8 @@ beforeEach(() => {
   mocks.findUnique.mockReset().mockResolvedValue({
     botConnectedAt: new Date("2026-10-28T00:00:00.000Z"),
     botLastSeenAt: new Date("2026-10-29T11:59:00.000Z"),
+    analyticsFinalizedThrough: W,
+    analyticsAggregatedAt: new Date("2026-10-29T11:45:00.000Z"),
   });
   mocks.summary.mockReset().mockResolvedValue(SUMMARY);
   mocks.recent.mockReset().mockResolvedValue([]);
@@ -74,9 +77,15 @@ describe("getOverviewData", () => {
     });
     expect(mocks.findUnique).toHaveBeenCalledWith({
       where: { id: "com_A" },
-      select: { botConnectedAt: true, botLastSeenAt: true },
+      select: {
+        botConnectedAt: true,
+        botLastSeenAt: true,
+        analyticsFinalizedThrough: true,
+        analyticsAggregatedAt: true,
+      },
     });
-    expect(mocks.summary).toHaveBeenCalledWith("com_A", NOW);
+    // The watermark of that community reaches the shared authoritative query.
+    expect(mocks.summary).toHaveBeenCalledWith("com_A", W, NOW);
     expect(mocks.recent).toHaveBeenCalledWith("com_A");
   });
 

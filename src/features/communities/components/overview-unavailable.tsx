@@ -13,8 +13,11 @@ import { CommunityHeader } from "./community-header";
  */
 export function OverviewUnavailable({
   community,
+  href = "/",
 }: {
   community: UserCommunity | null;
+  /** Page the retry link returns to. */
+  href?: string;
 }) {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
@@ -26,7 +29,7 @@ export function OverviewUnavailable({
           description="The database isn't answering right now. Nothing was changed. This page retries by itself, or you can try again."
           action={
             <Button asChild variant="outline">
-              <Link href="/">
+              <Link href={href}>
                 <RefreshCw aria-hidden="true" />
                 Try again
               </Link>

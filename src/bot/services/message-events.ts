@@ -61,7 +61,8 @@ export type RejectionReason =
   | "no_author"
   | "invalid"
   | "guild_not_allowed"
-  | "no_community";
+  | "no_community"
+  | "too_old";
 
 export type Classification =
   | { accepted: true; record: MessageEventRecord }
@@ -70,7 +71,15 @@ export type Classification =
 /** Decide whether a message is stored and build the record to persist. */
 export function classifyMessage(
   dto: MessageDto,
-  deps: { allowlist: Allowlist; cache: CommunityCache },
+  deps: {
+    allowlist: Allowlist;
+    cache: CommunityCache;
+    /**
+     * Oldest `occurredAt` still accepted (the retention cutoff). Older events
+     * are refused so a day that was already purged can never get a late raw row.
+     */
+    oldestAccepted?: () => Date;
+  },
 ): Classification {
   const reject = (reason: RejectionReason): Classification => ({
     accepted: false,
@@ -89,6 +98,9 @@ export function classifyMessage(
   const occurredAt = new Date(dto.createdTimestamp);
   if (!dto.id || !dto.channelId || Number.isNaN(occurredAt.getTime())) {
     return reject("invalid");
+  }
+  if (deps.oldestAccepted && occurredAt < deps.oldestAccepted()) {
+    return reject("too_old");
   }
 
   // Built field by field on purpose: never spread the DTO or the message.

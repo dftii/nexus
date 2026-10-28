@@ -14,18 +14,30 @@ import { DiscordjsErrorCodes } from "discord.js";
 import { getPrismaClient } from "@/server/db/prisma";
 import { createBotClient } from "./client";
 import { BotConfigError, parseBotConfig } from "./config";
+import {
+  createChannelDirectory,
+  registerChannelHandlers,
+} from "./handlers/channels";
 import { createGuildDirectory, registerGuildHandlers } from "./handlers/guilds";
 import { registerLifecycleHandlers } from "./handlers/lifecycle";
 import { registerMessageHandler } from "./handlers/messages";
+import { createAggregationService } from "./services/aggregation";
 import { createAllowlist } from "./services/allowlist";
+import { createAnalyticsMaintenance } from "./services/analytics-maintenance";
+import {
+  createChannelSync,
+  createPrismaChannelRepository,
+} from "./services/channel-sync";
 import { createCommunityCache } from "./services/community-cache";
 import { createHeartbeat } from "./services/heartbeat";
 import { createIngestion } from "./services/ingestion";
 import { createInstallationService } from "./services/installation";
 import { createLogger, describeError } from "./services/logger";
 import { createPrismaBotRepository } from "./services/repository";
+import { createRetentionService } from "./services/retention";
 
 const SHUTDOWN_FLUSH_TIMEOUT_MS = 5_000;
+const SHUTDOWN_ANALYTICS_TIMEOUT_MS = 10_000;
 
 async function main(): Promise<number> {
   const logger = createLogger();
@@ -65,7 +77,33 @@ async function main(): Promise<number> {
     directory,
     logger,
   });
-  const ingestion = createIngestion({ repository, allowlist, cache, logger });
+  const ingestion = createIngestion({
+    repository,
+    allowlist,
+    cache,
+    logger,
+    retentionDays: config.retentionDays,
+  });
+  const channelSync = createChannelSync({
+    repository: createPrismaChannelRepository(prisma),
+    cache,
+    allowlist,
+    directory: createChannelDirectory(client),
+    logger,
+  });
+  const analytics = createAnalyticsMaintenance({
+    aggregation: createAggregationService({
+      prisma,
+      retentionDays: config.retentionDays,
+    }),
+    retention: createRetentionService({
+      prisma,
+      retentionDays: config.retentionDays,
+    }),
+    communityIds: () => cache.entries().map(([, c]) => c.communityId),
+    beforeRun: () => channelSync.syncAll(),
+    logger,
+  });
   const heartbeat = createHeartbeat({
     repository,
     cache,
@@ -82,9 +120,12 @@ async function main(): Promise<number> {
     onReady: async () => {
       await installation.reconcile();
       heartbeat.start();
+      // Catch-up aggregation right away, then every 15 minutes.
+      analytics.start();
     },
   });
   registerGuildHandlers(client, installation);
+  registerChannelHandlers(client, channelSync);
   registerMessageHandler(client, ingestion);
 
   let shuttingDown = false;
@@ -98,6 +139,8 @@ async function main(): Promise<number> {
     shuttingDown = true;
     logger.info("shutdown_started", { reason });
     heartbeat.stop();
+    // A run in flight finishes its current community; none starts afterwards.
+    await analytics.stop(SHUTDOWN_ANALYTICS_TIMEOUT_MS);
     try {
       const { remaining } = await ingestion.stop(SHUTDOWN_FLUSH_TIMEOUT_MS);
       if (remaining > 0) logger.warn("shutdown_unflushed", { remaining });
