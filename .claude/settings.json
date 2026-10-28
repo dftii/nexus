@@ -1,0 +1,43 @@
+{
+  "extraKnownMarketplaces": {
+    "hallmark": {
+      "source": { "source": "github", "repo": "Nutlope/hallmark" }
+    },
+    "ponytail": {
+      "source": { "source": "github", "repo": "dietrichgebert/ponytail" }
+    },
+    "claude-kit": {
+      "source": { "source": "github", "repo": "JohnnyVizz/claude-kit" }
+    }
+  },
+  "enabledPlugins": {
+    "hallmark@hallmark": true,
+    "ponytail@ponytail": true,
+    "savvy-flow@claude-kit": true,
+    "savvy-progress@claude-kit": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py -m graphify hook-guard search",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py -m graphify hook-guard read",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
