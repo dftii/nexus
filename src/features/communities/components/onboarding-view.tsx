@@ -40,9 +40,9 @@ function Intro() {
           not change anything in Discord.
         </li>
         <li>
-          Live analytics need the NEXUS bot, which arrives in Phase 3. Until
-          then a connected server shows an honest &quot;not connected&quot; page
-          instead of numbers.
+          Live analytics need the NEXUS bot in the server. Until it is
+          installed, the overview explains how to add it instead of showing
+          numbers.
         </li>
       </ul>
     </header>

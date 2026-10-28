@@ -4,20 +4,25 @@ NEXUS is a community management and analytics platform for Discord servers:
 insights about growth and engagement, automations, and moderation tooling in
 one dashboard.
 
-> **Status: Phase 2 - Discord sign-in and community selection.** You can sign in
-> with Discord, see the servers you can manage and select one. The NEXUS **bot
-> does not exist yet** (Phase 3), so a selected server shows an honest "not
-> connected" page with no numbers. The only dashboard with data is the public
-> **demo** at `/demo`, which runs on generated sample data and says so. See
-> [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the roadmap and
+> **Status: Phase 3 - Discord bot and real activity (implemented, live check
+> pending).** You can sign in with Discord, select a server you manage, invite
+> the NEXUS bot to it and run the bot as a second process. The Overview shows the
+> bot status (not installed / offline / online) and **real** message metrics
+> (counts, active authors, recent activity) built only from message metadata the
+> bot stores; message text is never read. The public **demo** at `/demo` is the
+> only dashboard with generated sample data and says so. Phase 4 (analytics from
+> real events) is next. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) and
 > [docs/PROGRESS.md](docs/PROGRESS.md) for exactly what has and has not been
-> verified (the real Discord round trip has **not** been exercised yet).
+> verified: agents never started the live bot, so the Gateway, heartbeat and
+> invite flow against a real server still need a manual check
+> ([bot test plan](src/bot/README.md#manual-test-plan-server-capturas)).
 
 ## Stack
 
 Next.js 16 (App Router) - React 19 - TypeScript (strict) - Tailwind CSS v4 -
 shadcn/ui - Recharts - Geist (self-hosted) - Zod - Auth.js v5 - Prisma 7 +
-PostgreSQL - Vitest - ESLint + Prettier.
+PostgreSQL - discord.js 14 (bot process, run with tsx) - Vitest - ESLint +
+Prettier.
 
 ## Prerequisites
 
@@ -34,6 +39,13 @@ npm run db:up               # start PostgreSQL in Docker
 npm run db:deploy           # apply migrations
 # ... create the Discord application and fill in .env (next section) ...
 npm run dev                 # http://localhost:3000
+```
+
+To collect real activity, run the bot as a **second process** in another terminal
+(see [Running the bot](#running-the-bot)):
+
+```bash
+npm run bot:dev             # needs DISCORD_BOT_TOKEN and DISCORD_GUILD_ALLOWLIST
 ```
 
 Without the Discord variables the app still runs: `/demo` works, `/login` says
@@ -86,7 +98,9 @@ Copy `.env.example` to `.env`. `.env` is gitignored; never commit secrets.
 | `AUTH_URL`                                            | Prod     | Auth.js                     | Public URL of the app, e.g. `http://localhost:3000`. Alternative to `AUTH_TRUST_HOST`.                  |
 | `AUTH_TRUST_HOST`                                     | Prod     | Auth.js                     | `true` to trust the `Host` header. Needed by `next start` even on localhost (see Troubleshooting).      |
 | `NODE_EXTRA_CA_CERTS`                                 | Only if  | Node.js                     | Path to a CA bundle when something intercepts TLS (see Troubleshooting). Not an app variable.           |
-| `DISCORD_BOT_TOKEN`                                   | No       | Phase 3 (bot)               | Not used yet; commented out in `.env.example`.                                                          |
+| `DISCORD_BOT_TOKEN`                                   | For bot  | Bot process only            | Developer Portal -> Bot -> Reset Token. The web app never reads it.                                     |
+| `DISCORD_GUILD_ALLOWLIST`                             | For bot  | Bot process only            | Comma-separated server ids the bot may process. Empty: the bot stores nothing.                          |
+| `BOT_HEARTBEAT_INTERVAL_MS`                           | No       | Bot process only            | Heartbeat period in ms (default `60000`, 5000-120000). The web shows "offline" after 3 minutes.         |
 
 Sign-in counts as configured only when `AUTH_SECRET`, `AUTH_DISCORD_ID` and
 `AUTH_DISCORD_SECRET` are all set. Auth.js trusts the host automatically in
@@ -95,25 +109,45 @@ needs neither `AUTH_URL` nor `AUTH_TRUST_HOST`.
 
 ## Scripts
 
-| Script                                      | What it does                                         |
-| ------------------------------------------- | ---------------------------------------------------- |
-| `npm run dev` / `build` / `start`           | Next.js dev server / production build / serve build  |
-| `npm run lint` / `lint:fix`                 | ESLint (flat config, `eslint-config-next`)           |
-| `npm run typecheck`                         | `tsc --noEmit`                                       |
-| `npm run format` / `format:check`           | Prettier (with Tailwind class sorting)               |
-| `npm test` / `test:watch` / `test:coverage` | Vitest                                               |
-| `npm run check`                             | lint + typecheck + test (run before pushing)         |
-| `npm run db:up` / `db:down`                 | Start / stop the Compose PostgreSQL service          |
-| `npm run db:generate`                       | `prisma generate` (also runs on `postinstall`)       |
-| `npm run db:migrate`                        | `prisma migrate dev` (create + apply a migration)    |
-| `npm run db:deploy`                         | `prisma migrate deploy` (apply committed migrations) |
-| `npm run db:studio`                         | Prisma Studio                                        |
+| Script                                      | What it does                                             |
+| ------------------------------------------- | -------------------------------------------------------- |
+| `npm run dev` / `build` / `start`           | Next.js dev server / production build / serve build      |
+| `npm run lint` / `lint:fix`                 | ESLint (flat config, `eslint-config-next`)               |
+| `npm run typecheck`                         | `tsc --noEmit`                                           |
+| `npm run format` / `format:check`           | Prettier (with Tailwind class sorting)                   |
+| `npm test` / `test:watch` / `test:coverage` | Vitest                                                   |
+| `npm run check`                             | lint + typecheck + test (run before pushing)             |
+| `npm run bot:dev`                           | Run the Discord bot with `tsx watch` (restarts on edits) |
+| `npm run bot:start`                         | Run the Discord bot with `tsx` (no watch)                |
+| `npm run db:up` / `db:down`                 | Start / stop the Compose PostgreSQL service              |
+| `npm run db:generate`                       | `prisma generate` (also runs on `postinstall`)           |
+| `npm run db:migrate`                        | `prisma migrate dev` (create + apply a migration)        |
+| `npm run db:deploy`                         | `prisma migrate deploy` (apply committed migrations)     |
+| `npm run db:studio`                         | Prisma Studio                                            |
+
+## Running the bot
+
+The bot is a separate Node process (`src/bot`), not started by `npm run dev`.
+Local setup uses two terminals:
+
+1. `npm run dev` - the web app.
+2. `npm run bot:dev` - the bot. It needs `DISCORD_BOT_TOKEN` (Developer Portal ->
+   your application -> **Bot** -> Reset Token), `DATABASE_URL` and
+   `DISCORD_GUILD_ALLOWLIST` (the ids of the servers it may process).
+
+On the Overview of a server, **Invite bot** opens Discord's authorize page with
+one permission, View Channels, and the server pre-selected. The page then shows
+the real state: _not installed_, _installed · offline_ or _online_ (a heartbeat
+within the last 3 minutes), plus message counts and recent activity. The bot
+stores only message id, channel id, author id and timestamp; see
+[src/bot/README.md](src/bot/README.md) for exactly what is and is not collected,
+troubleshooting and the manual test plan.
 
 ## Database
 
 PostgreSQL runs through `docker-compose.yml` (`postgres:17-alpine`, named
 volume, healthcheck). Models: `User`, `Account` and `Session` (Auth.js),
-`Community` and `CommunityMembership`; see
+`Community` and `CommunityMembership`, and `MessageEvent` (bot activity); see
 [docs/DECISIONS.md](docs/DECISIONS.md#adr-018) for the schema decisions.
 
 ```bash
@@ -122,21 +156,21 @@ npm run db:deploy             # apply committed migrations (safe: never resets)
 npx prisma migrate status     # "Database schema is up to date!" when in sync
 ```
 
-There are two migrations: `20261028000000_init` and `20261028120000_auth`
-(additive). Use `db:deploy` to apply them. `db:migrate` (`prisma migrate dev`)
+There are three migrations: `20261028000000_init`, `20261028120000_auth` and
+`20261029000000_bot_activity` (all additive). Use `db:deploy` to apply them. `db:migrate` (`prisma migrate dev`)
 is for creating a new migration while developing and may offer to reset a
 database that has drifted: read its prompt before answering.
 
 ## Routes
 
-| Route                                                                    | Access    | What it is                                                         |
-| ------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------ |
-| `/login`                                                                 | Public    | Sign in with Discord; explains the scopes; link to the demo.       |
-| `/demo`                                                                  | Public    | The sample-data dashboard (labelled "Demo data").                  |
-| `/api/health`, `/api/ready`, `/api/auth/*`                               | Public    | Liveness, readiness, Auth.js endpoints.                            |
-| `/`                                                                      | Signed in | Overview of your selected server (or a redirect to `/onboarding`). |
-| `/onboarding`                                                            | Signed in | Pick the server to manage.                                         |
-| `/analytics`, `/automations`, `/moderation`, `/leaderboard`, `/settings` | Signed in | "Coming soon" pages naming the phase that delivers them.           |
+| Route                                                                    | Access    | What it is                                                                             |
+| ------------------------------------------------------------------------ | --------- | -------------------------------------------------------------------------------------- |
+| `/login`                                                                 | Public    | Sign in with Discord; explains the scopes; link to the demo.                           |
+| `/demo`                                                                  | Public    | The sample-data dashboard (labelled "Demo data").                                      |
+| `/api/health`, `/api/ready`, `/api/auth/*`                               | Public    | Liveness, readiness, Auth.js endpoints.                                                |
+| `/`                                                                      | Signed in | Bot status and real activity of your selected server (or a redirect to `/onboarding`). |
+| `/onboarding`                                                            | Signed in | Pick the server to manage.                                                             |
+| `/analytics`, `/automations`, `/moderation`, `/leaderboard`, `/settings` | Signed in | "Coming soon" pages naming the phase that delivers them.                               |
 
 Authorization is always checked on the server (`requireUser()` in each page and
 action); see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#authentication-and-authorization).
@@ -186,7 +220,7 @@ synthetic data: total and active members, messages, new members with
 period-over-period change, a 90-day membership chart, a 30-day activity chart
 and a recent-activity feed. The data has `source: "demo"` and a persistent "Demo
 data - no Discord server connected" banner. Demo numbers are **never** shown for
-a real community: `/` renders no figures until live analytics exist (Phase 4).
+a real community: `/` renders only real bot data (or the install steps).
 
 ## Troubleshooting
 
@@ -222,9 +256,14 @@ authorization expired or was revoked. Use the button to sign in again.
 
 ## Current limitations
 
-- No Discord bot yet (Phase 3, `src/bot/`): a connected server has no data, so
-  `/` shows a "not connected" page. There is no real analytics, automation,
-  moderation or XP.
+- The bot (Phase 3, `src/bot/`) records message metadata only. Joins, leaves,
+  voice and reactions are not collected, and analytics beyond the Overview
+  counts (Phase 4), automation, moderation and XP do not exist yet.
+- The live bot has not been started by any automated check: the Gateway
+  connection, heartbeat and invite flow against a real server are pending a
+  manual run (see the bot README).
+- The Overview counts everything stored for the community, including events
+  from an earlier installation if the bot was removed and added again.
 - The real Discord round trip (consent, callback, token exchange, guild list,
   token refresh) has not been exercised against Discord; it is covered by tests
   with mocked responses only. See [docs/PROGRESS.md](docs/PROGRESS.md).
@@ -239,8 +278,8 @@ authorization expired or was revoked. Use the button to sign in again.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). In short: `src/app` (thin
 routes), `src/features/<name>` (feature modules), `src/components/{ui,layout,common}`,
-`src/lib`, `src/server/{db,auth,discord,communities}`, `src/config`, `prisma/`,
-`tests/`.
+`src/lib`, `src/server/{db,auth,discord,communities,activity}`, `src/bot` (the
+bot process), `src/config`, `prisma/`, `tests/`.
 
 ## Documentation
 

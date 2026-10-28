@@ -6,6 +6,96 @@ import prettier from "eslint-config-prettier/flat";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Client-side code must never reach server-only or bot code. Pages under
+  // src/app and server modules may use @/server; these folders hold the
+  // components that can end up in the browser bundle. Type-only imports are
+  // erased at build time and stay allowed (props typed from server modules).
+  {
+    files: [
+      "src/components/**/*.{ts,tsx}",
+      "src/features/**/components/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": "off",
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/server", "@/server/**", "**/server/**"],
+              allowTypeImports: true,
+              message:
+                "Client-side components must not import server code (@/server) at runtime. Pass data in as props, call a Server Action, or use 'import type'.",
+            },
+            {
+              group: ["@/bot", "@/bot/**", "**/bot/**"],
+              message:
+                "The Discord bot is a separate process; never import it from the web.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Server Component that legitimately reads the session on the server.
+  {
+    files: ["src/features/auth/components/header-account.tsx"],
+    rules: { "@typescript-eslint/no-restricted-imports": "off" },
+  },
+  // Nothing in the web app may import the bot process.
+  {
+    files: ["src/app/**/*.{ts,tsx}", "src/server/**/*.ts", "src/lib/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/bot", "@/bot/**"],
+              message:
+                "The Discord bot is a separate process; never import it from the web. Share code through src/lib.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // The bot is a plain Node process: no Next.js, no Auth.js, and nothing that
+  // imports `server-only` (it throws outside the React Server environment).
+  // The only allowed @/server module is the framework-agnostic Prisma core.
+  {
+    files: ["src/bot/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "^@/server(/(?!db/prisma$).*)?$",
+              message:
+                "The bot may only import the Prisma core (@/server/db/prisma). @/server/db (index), auth and the other server modules import 'server-only', which throws in plain Node.",
+            },
+            {
+              group: [
+                "next",
+                "next/*",
+                "next-auth",
+                "next-auth/*",
+                "@auth/*",
+                "server-only",
+              ],
+              message:
+                "The bot runs in plain Node: no Next.js, Auth.js or server-only.",
+            },
+            {
+              group: ["@/app/**", "@/components/**", "@/features/**"],
+              message: "The bot must not import web UI code.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Must stay last: turns off stylistic rules that conflict with Prettier.
   prettier,
   globalIgnores([

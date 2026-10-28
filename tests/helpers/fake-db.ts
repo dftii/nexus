@@ -22,6 +22,7 @@ export interface CommunityRow {
   iconUrl: string | null;
   ownerId: string | null;
   botConnectedAt: Date | null;
+  botLastSeenAt?: Date | null;
 }
 
 export interface MembershipRow {

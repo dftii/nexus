@@ -5,6 +5,7 @@ import {
   formatLongDate,
   formatNumber,
   formatPercent,
+  formatRelativeTime,
   formatShortDate,
   formatSignedNumber,
   formatSignedPercent,
@@ -61,5 +62,18 @@ describe("date formatting (UTC)", () => {
   it("formats date-times in UTC with a label", () => {
     expect(formatDateTimeUtc("2026-10-26T17:42:00Z")).toBe("Oct 26, 17:42 UTC");
     expect(formatDateTimeUtc("2026-10-26T00:05:00Z")).toBe("Oct 26, 00:05 UTC");
+  });
+
+  it("describes elapsed time in words", () => {
+    const now = new Date("2026-10-29T12:00:00Z");
+    const ago = (ms: number) =>
+      formatRelativeTime(new Date(now.getTime() - ms), now);
+    expect(ago(3_000)).toBe("just now");
+    expect(ago(-5_000)).toBe("just now");
+    expect(ago(45_000)).toBe("45 s ago");
+    expect(ago(3 * 60_000)).toBe("3 min ago");
+    expect(ago(2 * 3_600_000)).toBe("2 h ago");
+    expect(ago(4 * 86_400_000)).toBe("4 d ago");
+    expect(formatRelativeTime("2026-10-29T11:59:00Z", now)).toBe("1 min ago");
   });
 });

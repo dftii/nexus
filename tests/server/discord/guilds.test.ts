@@ -119,19 +119,51 @@ describe("getEligibleGuilds", () => {
       inNexus: false,
       communityId: null,
       botConnected: false,
+      botStatus: "not_installed",
       alreadySelected: false,
     });
     expect(byId[G_ADMIN]).toMatchObject({
       inNexus: true,
       communityId: "com_a",
       botConnected: true,
+      botStatus: "offline",
       alreadySelected: true,
     });
     expect(byId[G_MANAGE]).toMatchObject({
       inNexus: true,
       botConnected: false,
+      botStatus: "not_installed",
       alreadySelected: false,
     });
+  });
+
+  it("derives the bot status from its stored timestamps", async () => {
+    const now = Date.now();
+    ctx.state.communities.push(
+      {
+        id: "com_a",
+        discordGuildId: G_ADMIN,
+        name: "Beta admin",
+        iconUrl: null,
+        ownerId: null,
+        botConnectedAt: new Date(now - 3_600_000),
+        botLastSeenAt: new Date(now - 30_000),
+      },
+      {
+        id: "com_m",
+        discordGuildId: G_MANAGE,
+        name: "Alpha manage",
+        iconUrl: null,
+        ownerId: null,
+        botConnectedAt: new Date(now - 3_600_000),
+        botLastSeenAt: new Date(now - 3_600_000),
+      },
+    );
+    const result = await getEligibleGuilds("user_1");
+    if (result.status !== "ok") throw new Error("expected ok");
+    const byId = Object.fromEntries(result.guilds.map((g) => [g.id, g]));
+    expect(byId[G_ADMIN]).toMatchObject({ botStatus: "online" });
+    expect(byId[G_MANAGE]).toMatchObject({ botStatus: "offline" });
   });
 
   it("builds CDN icon URLs and uses null without an icon", async () => {

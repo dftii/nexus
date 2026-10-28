@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-10-28 (Phase 2: Discord sign-in, community selection, onboarding UI).
+Last updated: 2026-10-29 (Phase 3: Discord bot, invite flow, real activity on the Overview).
 
 Legend used below: **verified** = a real command or a real run observed the
 behaviour; **mocked** = covered by automated tests that replace Discord (and
@@ -75,7 +75,49 @@ migrate status` are clean.
 - A visitor on `/demo` who clicks a "Soon" section is sent to `/login`.
 - No light theme, no theme switcher.
 
+## Phase 3
+
+### Verified (a real command or run observed it)
+
+| Item                                                                                                                    | How                                                                                            |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Migration `20261029000000_bot_activity` is applied; schema valid                                                        | `npx prisma migrate status`, `npx prisma validate`                                             |
+| The `COUNT(DISTINCT author_discord_id)` raw query and the min/max aggregate run against the real PostgreSQL             | Read-only script with a non-existent community id (returns 0 / null); nothing written          |
+| Lint, typecheck, format, tests and production build pass; unauthenticated smoke of `/login`, `/demo`, `/`, `/api/ready` | `npm run lint`, `typecheck`, `format:check`, `test`, `build`, `next start` on port 3141 + curl |
+
+### Mocked (automated tests with fakes)
+
+- Invite URL: exact parameters, `scope=bot`, `permissions=1024`, no secret, invalid ids give null.
+- Activity queries: every query scoped to one community id, 24 h / 7 d windows, empty state, row mapping with no content field (Prisma client replaced by mocks).
+- `getOverviewData`: uses only `getActiveCommunity`, null without a community, skips activity queries when not installed, typed error on database failure, never another community's id.
+- Overview UI: not installed (invite link, steps, no metrics), invite disabled when auth is not configured, offline (heartbeat, metrics kept), online, empty events, recent list (ids in mono, no content), error state, no demo data.
+- Auto refresh: 30 s interval, paused while the tab is hidden, one refresh on return, cleanup on unmount.
+- Onboarding badges derived from the bot status; `getEligibleGuilds` returns `botStatus`.
+- Bot services (first part of Phase 3): allowlist, classification, batch writer, installation, heartbeat, logger scrubbing, with an in-memory repository.
+
+### Verified live against Discord (2026-10-28, test server CAPTURAS)
+
+The developer started the bot with `npm run bot:start`; agents never started it.
+
+- **Invite:** the Overview's Invite bot link installed the bot in CAPTURAS with the View Channels permission; Discord listed it as offline until the process started.
+- **Gateway and installation:** the bot connected, Discord showed it online and the Overview switched to "Bot online" with a fresh heartbeat (auto refresh, no reload).
+- **Ingestion:** 8 messages sent in CAPTURAS were stored: 8 rows, 8 distinct message ids, 1 author. `message_events` has only `id`, `community_id`, `discord_message_id`, `discord_guild_id`, `discord_channel_id`, `author_discord_id`, `occurred_at`, `created_at`; no content column. The Overview showed the counts and the recent list.
+- **Offline:** after the process stopped, the Overview showed "Bot installed · offline" once the last heartbeat was older than 3 minutes, keeping the recorded metrics.
+- **Removal:** after kicking the bot and restarting the process, the ready-time reconcile cleared `bot_connected_at` and the Overview showed "Bot not installed" with the invite; the 8 events stayed in the database.
+
+### Not verified
+
+- A clean Ctrl+C shutdown (the process was stopped by closing its terminal) and the database retry path of the batch writer against a real outage.
+- `guildCreate` while the bot is running (re-inviting while online) and `guildDelete` with a real outage (`available === false`).
+- The Overview at mobile width with a real installed bot.
+
+### Known gaps and follow-ups
+
+- Counts include every stored event for the community, also from a previous installation of the bot (history is kept when the bot is removed).
+- No retention or aggregation of `message_events` yet (Phase 4).
+- `npm run bot:dev` uses `tsx watch`; use `bot:start` to observe a clean Ctrl+C shutdown.
+- The `bot:dev` / `bot:start` scripts were missing from `package.json` when this part started and were added.
+
 ## Not implemented yet (by design)
 
-The bot process, real data, analytics from real events, automations,
-moderation, XP. See [PROJECT_PLAN.md](PROJECT_PLAN.md).
+Analytics from real events beyond the Overview counts, joins / leaves / voice / reactions, automations, moderation, XP. See [PROJECT_PLAN.md](PROJECT_PLAN.md).

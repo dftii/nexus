@@ -58,13 +58,20 @@ model Community {
   iconUrl        String?   @map("icon_url")
   /// The NEXUS user who is the Discord owner of the guild, when known.
   ownerId        String?   @map("owner_id")
-  /// When the NEXUS bot was connected to the guild. Null = not installed.
+  /// First time the Gateway confirmed the NEXUS bot is present in the guild for
+  /// the current installation (= when activity collection started). Set by the
+  /// bot process only; cleared when the bot is removed from the guild. Null =
+  /// not installed.
   botConnectedAt DateTime? @map("bot_connected_at")
+  /// Last bot heartbeat that included this guild. Its freshness decides
+  /// online/offline (see src/lib/bot-status.ts).
+  botLastSeenAt  DateTime? @map("bot_last_seen_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  owner       User?                 @relation(fields: [ownerId], references: [id], onDelete: Restrict)
-  memberships CommunityMembership[]
+  owner         User?                 @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  memberships   CommunityMembership[]
+  messageEvents MessageEvent[]
 
   @@index([ownerId])
   @@map("communities")
@@ -129,4 +136,29 @@ model Session {
 
   @@index([userId])
   @@map("sessions")
+}
+
+/// One message observed by the bot (Phase 3). Metadata only: who, where, when.
+/// The message content, embeds, attachments and mentions are never read or
+/// stored (data minimization). Rows are never deleted when the bot is removed;
+/// the cascade only fires if a Community row is deleted, which is not a flow
+/// of this phase.
+model MessageEvent {
+  id               String   @id @default(cuid())
+  communityId      String   @map("community_id")
+  /// Discord snowflake of the message; unique so Gateway resends are idempotent.
+  discordMessageId String   @unique @map("discord_message_id")
+  discordGuildId   String   @map("discord_guild_id")
+  discordChannelId String   @map("discord_channel_id")
+  authorDiscordId  String   @map("author_discord_id")
+  /// When the message was created on Discord.
+  occurredAt       DateTime @map("occurred_at")
+  /// When NEXUS stored it.
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@index([communityId, occurredAt])
+  @@index([communityId, discordChannelId, occurredAt])
+  @@map("message_events")
 }

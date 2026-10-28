@@ -35,6 +35,7 @@ function guild(overrides: Record<string, unknown> = {}) {
     inNexus: false,
     communityId: null,
     botConnected: false,
+    botStatus: "not_installed",
     alreadySelected: false,
     ...overrides,
   };
@@ -74,7 +75,7 @@ describe("/onboarding", () => {
       screen.getByRole("heading", { name: "Connect a Discord server" }),
     ).toBeInTheDocument();
     expect(screen.getByText(/only reads which servers/)).toBeInTheDocument();
-    expect(screen.getByText(/Phase 3/)).toBeInTheDocument();
+    expect(screen.getByText(/NEXUS bot in the server/)).toBeInTheDocument();
   });
 
   it("lists eligible servers with reason and connection badges", async () => {
@@ -97,6 +98,7 @@ describe("/onboarding", () => {
           inNexus: true,
           communityId: "com_3",
           botConnected: true,
+          botStatus: "online",
           alreadySelected: true,
         }),
       ],
@@ -118,12 +120,12 @@ describe("/onboarding", () => {
 
     expect(within(hall).getByText("Administrator")).toBeInTheDocument();
     expect(
-      within(hall).getByText("In NEXUS, bot not connected"),
+      within(hall).getByText("In NEXUS · bot not installed"),
     ).toBeInTheDocument();
     expect(within(hall).getByRole("button", { name: /Select/ })).toBeEnabled();
 
     expect(within(den).getByText("Manage Server")).toBeInTheDocument();
-    expect(within(den).getByText("Bot connected")).toBeInTheDocument();
+    expect(within(den).getByText("Bot online")).toBeInTheDocument();
     expect(screen.queryByText("Selected")).not.toBeInTheDocument();
   });
 

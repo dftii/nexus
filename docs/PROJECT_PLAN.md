@@ -29,16 +29,24 @@ Out of Phase 2 on purpose: periodic re-verification of permissions
 (`lastVerifiedAt` is recorded; the job belongs with the bot), encrypting stored
 Discord tokens, role management inside NEXUS.
 
-## Phase 3 - Bot process and event ingestion (next)
+## Phase 3 - Bot process and message ingestion (implemented, pending live Discord check)
 
-Separate bot process (`src/bot/`) joined to registered guilds. "Invite bot" on
-the Overview becomes real and sets `communities.bot_connected_at`. Ingest events
-(joins, leaves, messages, voice, reactions) into new event tables with sensible
-retention and aggregation. Requires privileged gateway intents review. First
-Settings content (install and disconnect the bot) and periodic permission
-re-verification land here.
+Separate bot process (`src/bot/`, `npm run bot:dev`) that records message
+metadata (id, channel, author, timestamp; never content) for allowlisted servers
+that exist in NEXUS, tracks installation (`botConnectedAt`) and liveness
+(`botLastSeenAt`, heartbeat). The Overview's "Invite bot" is a real link (View
+Channels only), and the page shows the bot status and real counts, active
+authors and recent activity, refreshing every 30 s.
 
-## Phase 4 - Analytics from real data
+Status: code, migration and UI states are done and covered by mocked tests; the
+live bot was **never started** by an agent. The Gateway connection, heartbeat,
+invite and kick flows against a real server (CAPTURAS) are pending the manual
+test plan in `src/bot/README.md`. Phase 3 is closed once that run passes.
+
+Still out of Phase 3: joins, leaves, voice and reactions; retention and
+aggregation; periodic permission re-verification; Settings content.
+
+## Phase 4 - Analytics from real data (next)
 
 Replace dashboard demo data with queries over ingested events: growth,
 retention, activity heatmaps, top channels. Pre-aggregated rollups where

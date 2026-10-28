@@ -1,5 +1,6 @@
 import "server-only";
 
+import { type BotStatus, getBotStatus } from "@/lib/bot-status";
 import { getDb } from "@/server/db";
 import { fetchCurrentUserGuilds, type FetchGuildsOptions } from "./api";
 import { buildGuildIconUrl } from "./cdn";
@@ -18,8 +19,10 @@ export interface EligibleGuild {
   inNexus: boolean;
   /** NEXUS community id, when registered. */
   communityId: string | null;
-  /** True when the NEXUS bot is connected (always false until Phase 3). */
+  /** True when the bot is installed in the guild (`botStatus !== "not_installed"`). */
   botConnected: boolean;
+  /** Installation and liveness of the bot, from its stored timestamps. */
+  botStatus: BotStatus;
   /** True when this user already has a membership in the community. */
   alreadySelected: boolean;
 }
@@ -83,14 +86,19 @@ export async function getEligibleGuilds(
         id: true,
         discordGuildId: true,
         botConnectedAt: true,
+        botLastSeenAt: true,
         memberships: { where: { userId }, select: { id: true } },
       },
     });
+    const now = new Date();
     const byGuild = new Map(communities.map((c) => [c.discordGuildId, c]));
 
     const guilds = eligible
       .map<EligibleGuild>(({ guild, reason }) => {
         const community = byGuild.get(guild.id);
+        const botStatus = community
+          ? getBotStatus(community, now)
+          : "not_installed";
         return {
           id: guild.id,
           name: guild.name,
@@ -98,7 +106,8 @@ export async function getEligibleGuilds(
           reason,
           inNexus: Boolean(community),
           communityId: community?.id ?? null,
-          botConnected: community?.botConnectedAt != null,
+          botConnected: botStatus !== "not_installed",
+          botStatus,
           alreadySelected: (community?.memberships.length ?? 0) > 0,
         };
       })

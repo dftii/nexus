@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { EligibleGuild } from "@/server/discord/guilds";
+import { BotStatusBadge } from "./bot-status";
 import { CommunityAvatar } from "./community-avatar";
 import { GuildSelectForm } from "./guild-select-form";
 
@@ -11,13 +12,6 @@ export const REASON_LABEL = {
   administrator: "Administrator",
   manage_server: "Manage Server",
 } as const;
-
-/** What NEXUS knows about the guild, in words. */
-export function connectionStatus(guild: EligibleGuild): string {
-  if (guild.botConnected) return "Bot connected";
-  if (guild.inNexus) return "In NEXUS, bot not connected";
-  return "Not in NEXUS yet";
-}
 
 /**
  * One row of the onboarding list. `selected` is true for the community the
@@ -41,14 +35,20 @@ export function GuildCard({
           <p className="truncate font-medium">{guild.name}</p>
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="outline">{REASON_LABEL[guild.reason]}</Badge>
-            <Badge
-              variant="secondary"
-              className={
-                guild.botConnected ? "text-success" : "text-muted-foreground"
-              }
-            >
-              {connectionStatus(guild)}
-            </Badge>
+            {guild.inNexus ? (
+              <BotStatusBadge
+                status={guild.botStatus}
+                label={
+                  guild.botStatus === "not_installed"
+                    ? "In NEXUS · bot not installed"
+                    : undefined
+                }
+              />
+            ) : (
+              <Badge variant="secondary" className="text-muted-foreground">
+                Not in NEXUS yet
+              </Badge>
+            )}
             {selected ? (
               <Badge className="gap-1">
                 <Check aria-hidden="true" />

@@ -82,3 +82,22 @@ export function formatLongDate(input: string | Date): string {
 export function formatDateTimeUtc(input: string | Date): string {
   return `${dateTime.format(toDate(input))} UTC`;
 }
+
+/**
+ * Elapsed time between `from` and `now` in words: "just now", "45 s ago",
+ * "3 min ago", "2 h ago", "4 d ago". A date in the future (clock skew) reads
+ * as "just now". Pure given `now`, so server output is deterministic.
+ */
+export function formatRelativeTime(
+  from: string | Date,
+  now: Date = new Date(),
+): string {
+  const seconds = Math.floor((now.getTime() - toDate(from).getTime()) / 1000);
+  if (seconds < 10) return "just now";
+  if (seconds < 60) return `${seconds} s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h ago`;
+  return `${Math.floor(hours / 24)} d ago`;
+}

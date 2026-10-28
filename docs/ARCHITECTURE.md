@@ -1,7 +1,7 @@
 # Architecture
 
-NEXUS is a single npm package (no workspaces) containing a Next.js web app and,
-later, a Discord bot process that share the same database layer.
+NEXUS is a single npm package (no workspaces) containing a Next.js web app and a
+Discord bot process that share the same database.
 
 ## Directory layout
 
@@ -27,9 +27,11 @@ src/
   server/auth/    Auth.js config, current-user helpers. server-only.
   server/discord/ Discord API client, token refresh, eligibility. server-only.
   server/communities/  Tenant-isolated community reads, selection, active cookie.
+  server/activity/     Read side of the bot's data: activity summary, recent
+                       events, the Overview loader. server-only.
   config/         Static app config (site name, nav, ...)
   generated/      Prisma client output. Gitignored; created by `prisma generate`.
-  bot/            Planned Discord bot process (README only for now)
+  bot/            Discord bot process (own entrypoint, not part of Next.js)
 prisma/           schema.prisma and migrations/
 tests/            Vitest tests, mirroring src/ paths
 docs/             Project documentation
@@ -42,7 +44,8 @@ app (routes) -> features -> components, lib, server
 components   -> lib            (never server/, never features/)
 features     -> components, lib, server/* (server components/actions only)
 server/*     -> lib (env), generated/prisma, other server/* (see below)
-bot (future) -> server/db, lib (never app/, components/)
+bot          -> server/db/prisma (the Prisma core), lib, generated/prisma
+                (never app/, components/, server/db index, server/auth, next/*)
 ```
 
 - Routes stay thin: parse input, call a feature function, render.
@@ -55,6 +58,9 @@ bot (future) -> server/db, lib (never app/, components/)
 ```
 Browser -> Next.js route (src/app) -> [feature code] -> server/* -> getDb() -> PostgreSQL
                                                           \-> Discord API (user's token)
+
+Discord Gateway -> bot handlers -> bot services -> batch writer -> PostgreSQL
+                                       \-> heartbeat / installation -> communities
 ```
 
 Signed-in pages read the session, memberships and (onboarding only) Discord. The
@@ -211,17 +217,68 @@ is the only route that renders demo figures: `getDashboardData()` always returns
 community's Overview (`CommunityOverview`) never receives or renders demo data; a
 unit test asserts it contains no numbers and no "Demo data" text. Live data
 arrives in Phase 4 for the real community's own page, not by pointing `/` at
-demo data.
+demo data. Since Phase 3 the Overview shows real bot status and message counts
+from the bot's own tables; those are real, never demo.
 
-## Future: Discord bot process
+## Discord bot process
 
-Phase 3 adds a long-running bot (discord.js) in `src/bot/`, started separately
-(`tsx src/bot/index.ts`) from the web server. It will write events to PostgreSQL
-through the same Prisma layer and reuse `src/lib`. It must not import from
-`src/app` or `src/components`. Deploy as a second process/container from the
-same image or repo. Server-only imports will need a small adjustment for the
-bot's runtime (the `server-only` package throws outside React Server
-environments); decide when the bot is built.
+A long-running discord.js process in `src/bot/`, started separately from the web
+server with `npm run bot:dev` / `bot:start` (`tsx`, ADR-026). Deploy it as a
+second process or container from the same repo. The two processes share only the
+database: the bot writes, the web reads, and neither calls the other.
+
+### Data flow
+
+```
+Discord Gateway (intents Guilds + GuildMessages)
+  -> handlers/    map discord.js objects to plain ids (no business logic)
+  -> services/    allowlist, classify (keep 4 fields), ingestion, installation,
+                  heartbeat; talk to a narrow BotRepository interface
+  -> batch writer buffered, createMany skipDuplicates, retry with backoff
+  -> PostgreSQL   message_events, communities.bot_connected_at / bot_last_seen_at
+  -> src/server/activity (server-only)   counts, distinct authors, recent events
+  -> Overview page (server component) -> CommunityOverview
+```
+
+Metadata only: message id, guild id, channel id, author id and timestamp are
+stored; content, embeds, attachments and mentions are never read (ADR-027).
+
+### Database boundary
+
+`src/server/db/prisma.ts` is a framework-agnostic Prisma core with no
+`server-only` import. The web uses it through `src/server/db` (`getDb()`, which
+adds `server-only` so client bundles cannot reach it); the bot imports the core
+directly, because `server-only` throws in plain Node (ADR-025).
+
+### ESLint boundaries
+
+- Client components cannot import `@/server/**` at runtime (type imports are OK).
+- `src/app`, `src/server` and `src/lib` cannot import `@/bot/**`.
+- `src/bot/**` may import only `@/server/db/prisma` from the server tree, never
+  `next/*`, Auth.js, `server-only` modules or UI code.
+
+### Bot status model
+
+The bot writes two timestamps and never an "offline" flag. `getBotStatus`
+(`src/lib/bot-status.ts`, pure) derives the state at read time:
+
+| State           | Rule                                                             |
+| --------------- | ---------------------------------------------------------------- |
+| `not_installed` | `botConnectedAt` is null (never seen, or removed from the guild) |
+| `online`        | installed and `botLastSeenAt` at most 3 minutes old              |
+| `offline`       | installed, and no heartbeat or an older one                      |
+
+The Overview loader (`getOverviewData`, ADR-031) obtains the community only from
+`getActiveCommunity(userId)`, then runs activity queries scoped to that id. A
+browser-supplied community id is never used. Database errors become a typed
+error state rendered by the page.
+
+### Invite link
+
+`buildBotInviteUrl` (`src/lib/discord-invite.ts`) builds the authorize URL on the
+server from the public OAuth Client ID (`AUTH_DISCORD_ID`) and the community's
+guild id, with `scope=bot` and `permissions=1024` (View Channels). It is rendered
+as a plain link; installation is confirmed only by the bot itself (ADR-029).
 
 ## Why no monorepo
 

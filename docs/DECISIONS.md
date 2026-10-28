@@ -457,3 +457,202 @@ day }`. The `session` callback builds the session from scratch from three
 - **Consequence:** `alreadySelected` from `getEligibleGuilds` means "the user has a
   membership", not "is the active community"; "Selected" is computed by comparing
   the community id with `getActiveCommunity`.
+
+<a id="adr-025"></a>
+
+## ADR-025: A framework-agnostic Prisma core; `server-only` stays on the web entry
+
+- **Context:** the bot is a plain Node process (run with `tsx`). The `server-only`
+  package throws when it is imported outside the React Server environment, and
+  `@/server/db` (index, client, ping) imports it on purpose to keep database code
+  out of client bundles.
+- **Decision:**
+  - The Prisma client construction (PrismaPg adapter, lazy singleton cached on
+    `globalThis` outside production) moved to `src/server/db/prisma.ts`, which
+    does not import `server-only` and exports `createPrismaClient()` and
+    `getPrismaClient()`.
+  - `src/server/db/client.ts` keeps `import "server-only"` and `getDb()` now
+    delegates to `getPrismaClient()`; `src/server/db/index.ts` is unchanged. Web
+    behaviour and all existing tests are unchanged.
+  - The bot imports `@/server/db/prisma` directly and never `@/server/db`.
+  - ESLint `no-restricted-imports` enforces the boundaries: `src/bot/**` may import
+    only `@/server/db/prisma` from `@/server` and no `next/*`, Auth.js,
+    `server-only` or web UI code; `src/components/**` and
+    `src/features/**/components/**` may not import `@/server/**` or `@/bot/**` at
+    runtime (type-only imports stay allowed because they are erased; the
+    `HeaderAccount` Server Component is the one explicit exemption); `src/app`,
+    `src/server` and `src/lib` may not import `@/bot/**`.
+  - A test runs the bot module graph in a real Node process through `tsx`, where
+    `server-only` really throws (the Vitest alias to a stub would hide a
+    violation), plus a control import of `@/server/db` that must throw.
+- **Consequence:** one place builds the Prisma client for both processes. The
+  guard is mechanical (lint plus a real-Node import test) instead of a convention.
+
+<a id="adr-026"></a>
+
+## ADR-026: Bot runtime: discord.js 14.27.0, tsx, minimal intents, separate process
+
+- **Decision:**
+  - `discord.js` 14.27.0 (exact pin) and `tsx` 4.23.15 (dev dependency, exact).
+    The bot is not part of `next build` or `next dev`; nothing starts it on
+    install.
+  - Scripts: `npm run bot:dev` (`tsx watch`) and `npm run bot:start`, both with
+    `--env-file-if-exists=.env` (Node 24 flag; verified to be forwarded by
+    `tsx`, and a missing file only prints a note, so production can use real
+    environment variables). `tsconfig` includes `src/bot`, so `npm run typecheck`
+    covers it; `tsx` resolves the `@/*` alias from `tsconfig`.
+  - Intents are exactly `Guilds` and `GuildMessages`. `MessageContent`,
+    `GuildMembers` and `GuildPresences` (privileged, not needed) are not
+    requested. The message cache is disabled (`MessageManager: 0`): messages are
+    processed as they arrive and never retained.
+  - Reconnection is left to discord.js; the bot only logs shard events. Exit
+    codes: 0 clean shutdown, 1 runtime failure (invalid token via the
+    `TokenInvalid` error, unhandled error), 2 invalid configuration. SIGINT and
+    SIGTERM (and unhandled errors) trigger one graceful shutdown: stop the
+    heartbeat, flush the buffer with a timeout, `client.destroy()`,
+    `$disconnect()`. A second signal exits immediately.
+  - Structured JSON-line logs on stdout. Fields are scrubbed (sensitive keys,
+    token-shaped strings, credentialed URLs); only counts, reasons and
+    allowlisted guild ids are logged, never message content or payloads.
+  - Layout: `config.ts`, `client.ts`, `handlers/` (thin: map discord.js objects to
+    ids and delegate) and `services/` (no discord.js imports; they take a narrow
+    `BotRepository` interface, so they are unit-tested with an in-memory fake).
+- **Consequence:** the web app and the bot share one package and one database but
+  have separate lifecycles and separate failure modes.
+
+<a id="adr-027"></a>
+
+## ADR-027: Message ingestion: allowlist, metadata only, idempotent batches
+
+- **Decision:**
+  - **Allowlist, fail closed.** `DISCORD_GUILD_ALLOWLIST` (comma-separated server
+    ids, 17 to 20 digits, trimmed, deduplicated; an invalid entry is a startup
+    error that names its position, not its value). When empty or missing the bot
+    still logs in (to verify the token) but processes and writes nothing, and says
+    how to fix it. A guild also needs an existing NEXUS `Community`; the bot never
+    creates communities.
+  - **Data minimization.** One function reads a message and only these fields:
+    `id`, `guildId`, `channelId`, `author.id`, `author.bot`, `createdTimestamp`,
+    plus `webhookId` and `system` to skip webhook and system messages.
+    `content`, `embeds`, `attachments`, `components`, `mentions` and `stickers`
+    are never touched. Ignored: DMs, bot authors, webhooks, system messages,
+    non-allowlisted guilds, guilds without a community. Rejections are counted per
+    reason and logged in aggregate.
+  - **Schema** (migration `20261029000000_bot_activity`, additive):
+    `MessageEvent` (`message_events`): `id`, `communityId`, `discordMessageId`
+    (unique), `discordGuildId`, `discordChannelId`, `authorDiscordId`,
+    `occurredAt` (message creation time), `createdAt`; indexes
+    `(communityId, occurredAt)` and `(communityId, discordChannelId, occurredAt)`.
+    The relation to `Community` is `onDelete: Cascade`: deleting a community is not
+    a Phase 3 flow, and events must not outlive their community. Removing the bot
+    from a guild never deletes events.
+  - **Buffered batch writer.** Records are queued and written with one
+    `createMany({ skipDuplicates: true })` every 2 s or at 100 items, so Gateway
+    resends are idempotent (counted as `skipped`). On a database error the batch
+    goes back to the front of the buffer and is retried with exponential backoff
+    (1 s doubling to a 30 s cap). The buffer is bounded (5000): when full the
+    oldest records are dropped and counted. Shutdown flushes with a timeout and
+    reports what is left.
+- **Consequence:** a database outage degrades to bounded memory and some dropped
+  history, never to a crash or to unbounded growth. The cost of a restart during
+  an outage is the buffered, unflushed messages (accepted for an analytics feed).
+
+<a id="adr-028"></a>
+
+## ADR-028: Installation tracking and heartbeat
+
+- **Decision:**
+  - `Community.botConnectedAt`: set by the bot (only where it is null) when the
+    Gateway confirms it is present in an allowlisted guild that has a community.
+    It keeps the first verified presence of the current installation, that is when
+    collection started. It is cleared on a real removal. `Community.botLastSeenAt`
+    (new): set by the heartbeat. The bot is the only writer of both.
+  - On `ready` the bot reconciles: present allowlisted guilds with a community are
+    connected and touched; allowlisted communities whose guild is absent (removed
+    while the bot was offline) are cleared; non-allowlisted guilds are only counted
+    in the log. `guildCreate` connects (it also fires when a guild returns from an
+    outage, which keeps the original `botConnectedAt`). `guildDelete` clears only
+    when `guild.available !== false`: an unavailable guild is a Discord outage, not
+    a removal, and nothing is changed.
+  - Heartbeat (default 60 s, `BOT_HEARTBEAT_INTERVAL_MS`, bounded 5 s to 120 s):
+    refresh the community cache, connect communities that appeared in NEXUS after
+    startup, then ONE `updateMany` of `botLastSeenAt` for the present allowlisted
+    communities. It is skipped while the Gateway is not ready and a failing beat
+    only logs: the bot never writes "offline"; staleness is derived.
+  - `src/lib/bot-status.ts` (no `server-only`, no discord.js) exports
+    `BOT_HEARTBEAT_STALE_AFTER_MS = 3 * 60_000` and
+    `getBotStatus({ botConnectedAt, botLastSeenAt }, now)` returning
+    `not_installed` (no `botConnectedAt`), `offline` (installed but never seen, or
+    a heartbeat older than the threshold) or `online`. A heartbeat exactly at the
+    threshold is still online; a future-dated one counts as fresh.
+- **Consequence:** a crashed bot turns "offline" by itself after three minutes
+  without any writer, and an installation that was removed shows "not installed"
+  while its history stays in `message_events`.
+
+<a id="adr-029"></a>
+
+## ADR-029: Bot invitation link with minimal permissions
+
+- **Decision:** the Overview's **Invite bot** is a plain link built on the server
+  by `buildBotInviteUrl({ clientId, guildId })` (`src/lib/discord-invite.ts`):
+  `https://discord.com/oauth2/authorize?client_id=<id>&scope=bot&permissions=1024&guild_id=<guild>&disable_guild_select=true`.
+  - `permissions=1024` is `VIEW_CHANNEL` (`1 << 10`) and nothing else: the
+    Gateway only delivers message events for channels the bot can see. No Send
+    Messages, no Manage *, no Administrator.
+  - `scope=bot` only; no `applications.commands` (the bot has no slash commands).
+  - The client id is the public OAuth Client ID already used for sign-in
+    (`AUTH_DISCORD_ID`), so there is no new variable. Both ids must be snowflakes
+    (17 to 20 digits) or the helper returns null; with auth unconfigured the page
+    shows a disabled button with the reason. No secret or token can appear in the
+    URL (tested).
+  - The link opens in a new tab with `rel="noopener noreferrer"`. Opening or
+    approving it changes nothing in NEXUS: installation is confirmed only by the
+    bot (`botConnectedAt`, ADR-028).
+- **Consequence:** the community owner sees exactly what is requested, and a
+  compromised bot token can do little more than read metadata of visible channels.
+  If a later phase needs more (for example moderation), the permissions integer
+  changes in one place and existing installs must re-authorize.
+
+<a id="adr-030"></a>
+
+## ADR-030: The Overview refreshes itself every 30 seconds
+
+- **Decision:** a tiny client component (`AutoRefresh`) calls `router.refresh()`
+  every 30 s while the tab is visible. It pauses when `document.hidden`, refreshes
+  once when the tab becomes visible again, cleans up on unmount and renders
+  nothing (so there is no motion to reduce for `prefers-reduced-motion`). The
+  server component re-runs, so status and metrics update with no client-side
+  data fetching, no API route and no websocket.
+- **Why not polling an API or SSE:** the numbers are cheap indexed counts, 30 s
+  is well below the 3-minute offline threshold, and a refresh reuses the existing
+  authorization path (`requireUser` + `getActiveCommunity`).
+- **Consequence:** an open Overview costs about two requests a minute; a hidden
+  tab costs none.
+
+<a id="adr-031"></a>
+
+## ADR-031: Overview data: honest activity summary
+
+- **Decision:**
+  - `getOverviewData(userId)` (`src/server/activity`) gets the community **only**
+    from `getActiveCommunity(userId)`; the activity queries then receive that id.
+    No community returns null (the page redirects to onboarding); a database error
+    returns `{ status: "error" }`, which the page renders as an error state
+    instead of crashing.
+  - `getCommunityActivitySummary` returns `totalEvents`, `last24h`, `last7d`,
+    `activeAuthors7d`, `firstEventAt`, `lastEventAt`. Counts use the
+    `(community_id, occurred_at)` index; active authors are one
+    `COUNT(DISTINCT author_discord_id)` over the last 7 days, so author ids never
+    leave the database. `getRecentActivity` returns the newest events as ids and
+    time only (limit clamped to 50).
+  - Activity is queried only when the bot is installed. Labels are literal
+    ("Messages recorded, since <collection start>", "Last 24 hours", "Last 7
+    days", "Active authors"): no deltas and no comparisons, because there is no
+    previous period to compare with yet.
+  - Recent activity shows time (UTC), channel id and author id in monospace, with
+    the full id in a tooltip. Resolving names would need extra Discord calls and
+    privileges and is left to Phase 4.
+  - Onboarding guild cards use the same status (`getEligibleGuilds` returns
+    `botStatus`; `botConnected` stays as `botStatus !== "not_installed"`).
+- **Consequence:** the figures are real but modest; totals also include events
+  from a previous installation of the bot (history is kept on removal).
