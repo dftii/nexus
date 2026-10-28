@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEMO_PATH,
   getNavItem,
   isActivePath,
+  isDemoPath,
   navMetadata,
   navigation,
+  resolveNavHref,
 } from "@/config/navigation";
 
 describe("navigation config", () => {
@@ -56,5 +59,36 @@ describe("navigation config", () => {
   it("derives route metadata from the config", () => {
     expect(navMetadata("/moderation").title).toBe("Moderation");
     expect(() => navMetadata("/missing")).toThrow();
+  });
+});
+
+describe("navigation config: demo", () => {
+  it("has a demo href only for Overview", () => {
+    const withDemo = navigation.filter((i) => i.demoHref);
+    expect(withDemo.map((i) => i.href)).toEqual(["/"]);
+    expect(withDemo[0]?.demoHref).toBe(DEMO_PATH);
+  });
+
+  it("detects the demo route and nothing that merely starts with it", () => {
+    expect(isDemoPath("/demo")).toBe(true);
+    expect(isDemoPath("/demo/x")).toBe(true);
+    expect(isDemoPath("/demonstration")).toBe(false);
+    expect(isDemoPath("/")).toBe(false);
+  });
+
+  it("resolves links and active state per route", () => {
+    const overview = getNavItem("/")!;
+    const analytics = getNavItem("/analytics")!;
+    expect(resolveNavHref(overview, "/demo")).toBe("/demo");
+    expect(resolveNavHref(overview, "/onboarding")).toBe("/");
+    expect(resolveNavHref(analytics, "/demo")).toBe("/analytics");
+    expect(isActivePath(overview, "/demo")).toBe(true);
+    expect(isActivePath(overview, "/")).toBe(true);
+    expect(isActivePath(overview, "/onboarding")).toBe(false);
+  });
+
+  it("no longer promises sign-in as a future Settings feature", () => {
+    const settings = getNavItem("/settings")!;
+    expect(settings.planned?.join(" ")).not.toMatch(/sign in/i);
   });
 });

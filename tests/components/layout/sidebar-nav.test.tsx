@@ -61,3 +61,42 @@ describe("SidebarNav", () => {
     expect(onNavigate).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("SidebarNav on the public demo", () => {
+  beforeEach(() => {
+    pathname.current = "/demo";
+  });
+
+  it("points Overview at /demo and highlights it", () => {
+    render(<SidebarNav />);
+    const overview = screen.getByRole("link", { name: "Overview" });
+    expect(overview).toHaveAttribute("href", "/demo");
+    expect(overview).toHaveAttribute("aria-current", "page");
+    const current = screen
+      .getAllByRole("link")
+      .filter((link) => link.getAttribute("aria-current") === "page");
+    expect(current).toHaveLength(1);
+  });
+
+  it("keeps the other sections marked Soon", () => {
+    render(<SidebarNav />);
+    const soon = navigation.filter((item) => item.status === "soon");
+    expect(screen.getAllByText("Soon")).toHaveLength(soon.length);
+    expect(screen.getByRole("link", { name: /Analytics/ })).toHaveAttribute(
+      "href",
+      "/analytics",
+    );
+  });
+
+  it("points Overview back at / outside the demo", () => {
+    pathname.current = "/onboarding";
+    render(<SidebarNav />);
+    expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByRole("link", { name: "Overview" })).not.toHaveAttribute(
+      "aria-current",
+    );
+  });
+});

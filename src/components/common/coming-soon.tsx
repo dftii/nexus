@@ -41,8 +41,8 @@ export function ComingSoon({ href }: { href: string }) {
           </div>
         ) : null}
         <p className="text-sm text-muted-foreground">
-          Nothing on this page is connected to a Discord server. NEXUS currently
-          runs on demo data only.
+          This section is not built yet, so there is nothing to configure or
+          show here. The Overview shows the state of your connected server.
         </p>
         <Button asChild variant="secondary">
           <Link href="/">

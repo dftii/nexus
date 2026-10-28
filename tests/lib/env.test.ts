@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { getEnv, parseEnv, resetEnvCache } from "@/lib/env";
+import {
+  getAuthEnv,
+  getEnv,
+  isAuthConfigured,
+  parseEnv,
+  resetEnvCache,
+} from "@/lib/env";
 
 const validUrl = "postgresql://user:secret-pass@localhost:5432/db";
 
@@ -60,5 +66,34 @@ describe("getEnv", () => {
     const first = getEnv();
     process.env.DATABASE_URL = "postgresql://other@localhost/other";
     expect(getEnv()).toBe(first);
+  });
+});
+
+describe("auth env", () => {
+  const full = {
+    AUTH_SECRET: "s",
+    AUTH_DISCORD_ID: "id",
+    AUTH_DISCORD_SECRET: "secret",
+  };
+
+  it("is optional: nothing set means not configured, without throwing", () => {
+    expect(isAuthConfigured({})).toBe(false);
+    expect(getAuthEnv({})).toEqual({
+      AUTH_SECRET: undefined,
+      AUTH_DISCORD_ID: undefined,
+      AUTH_DISCORD_SECRET: undefined,
+    });
+  });
+
+  it("needs all three variables", () => {
+    expect(isAuthConfigured(full)).toBe(true);
+    for (const key of Object.keys(full)) {
+      expect(isAuthConfigured({ ...full, [key]: undefined })).toBe(false);
+    }
+  });
+
+  it("treats empty and blank values (as copied from .env.example) as unset", () => {
+    expect(isAuthConfigured({ ...full, AUTH_SECRET: "" })).toBe(false);
+    expect(isAuthConfigured({ ...full, AUTH_DISCORD_ID: "   " })).toBe(false);
   });
 });

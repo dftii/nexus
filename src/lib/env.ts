@@ -50,3 +50,43 @@ export function getEnv(): ServerEnv {
 export function resetEnvCache() {
   cached = undefined;
 }
+
+/**
+ * Authentication environment (Auth.js v5 names). Kept apart from `getEnv()` on
+ * purpose: auth variables are optional, so the app builds, serves its public
+ * pages and runs its tests without them. When they are missing, sign-in is
+ * reported as "not configured" instead of crashing.
+ *
+ * `AUTH_URL` / `AUTH_TRUST_HOST` are read by Auth.js itself (see
+ * node_modules/@auth/core), not here.
+ */
+const authEnvSchema = z.object({
+  AUTH_SECRET: z.string().min(1).optional(),
+  AUTH_DISCORD_ID: z.string().min(1).optional(),
+  AUTH_DISCORD_SECRET: z.string().min(1).optional(),
+});
+
+export type AuthEnv = z.infer<typeof authEnvSchema>;
+
+/** Auth variables with empty strings treated as unset. Never throws. */
+export function getAuthEnv(
+  source: Record<string, string | undefined> = process.env,
+): AuthEnv {
+  const clean = (value: string | undefined) =>
+    value && value.trim() !== "" ? value : undefined;
+  return authEnvSchema.parse({
+    AUTH_SECRET: clean(source.AUTH_SECRET),
+    AUTH_DISCORD_ID: clean(source.AUTH_DISCORD_ID),
+    AUTH_DISCORD_SECRET: clean(source.AUTH_DISCORD_SECRET),
+  });
+}
+
+/** True when sign-in can work: the secret and both Discord credentials are set. */
+export function isAuthConfigured(
+  source: Record<string, string | undefined> = process.env,
+): boolean {
+  const env = getAuthEnv(source);
+  return Boolean(
+    env.AUTH_SECRET && env.AUTH_DISCORD_ID && env.AUTH_DISCORD_SECRET,
+  );
+}

@@ -23,6 +23,19 @@ export interface NavItem {
   phase?: number;
   /** What the section will contain once built. Only set for "soon" items. */
   planned?: readonly string[];
+  /**
+   * Where the item points while browsing the public demo, when the demo has
+   * its own version of the page. Items without one keep `href`.
+   */
+  demoHref?: string;
+}
+
+/** The public demo lives under this path (see ADR-021). */
+export const DEMO_PATH = "/demo";
+
+/** True for the demo route (and anything below it). */
+export function isDemoPath(pathname: string): boolean {
+  return pathname === DEMO_PATH || pathname.startsWith(`${DEMO_PATH}/`);
 }
 
 export const navigation: readonly NavItem[] = [
@@ -32,6 +45,7 @@ export const navigation: readonly NavItem[] = [
     icon: LayoutDashboard,
     status: "available",
     description: "Members, activity and recent events at a glance.",
+    demoHref: DEMO_PATH,
   },
   {
     label: "Analytics",
@@ -90,10 +104,10 @@ export const navigation: readonly NavItem[] = [
     href: "/settings",
     icon: Settings,
     status: "soon",
-    phase: 2,
+    phase: 3,
     description: "Account and community configuration.",
     planned: [
-      "Sign in with Discord and pick the community to manage",
+      "Installing and disconnecting the NEXUS bot for a community",
       "Roles and permissions for your team",
       "Per-feature options as each feature ships",
     ],
@@ -105,10 +119,19 @@ export function getNavItem(pathname: string): NavItem | undefined {
   return navigation.find((item) => item.href === pathname);
 }
 
-/** True when `pathname` belongs to `item` (exact for "/", prefix otherwise). */
+/** The link target for `item`: its demo version while browsing the demo. */
+export function resolveNavHref(item: NavItem, pathname: string): string {
+  return isDemoPath(pathname) && item.demoHref ? item.demoHref : item.href;
+}
+
+/**
+ * True when `pathname` belongs to `item` (exact for "/", prefix otherwise).
+ * On the demo, Overview is active at `/demo` and nothing else is.
+ */
 export function isActivePath(item: NavItem, pathname: string): boolean {
-  if (item.href === "/") return pathname === "/";
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const href = resolveNavHref(item, pathname);
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 /** Per-route `metadata` derived from the nav config. */

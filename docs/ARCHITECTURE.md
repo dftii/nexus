@@ -8,8 +8,12 @@ later, a Discord bot process that share the same database layer.
 ```
 src/
   app/            Routes only (thin). Pages, layouts, route handlers.
-    (app)/        Route group with the app shell layout; Overview at /,
-                  placeholder pages for the sections that are not built
+    (app)/        Route group with the app shell layout
+      (protected)/  Signed-in pages: / (Overview), /onboarding, and the
+                    placeholder pages for sections that are not built
+      demo/         Public demo dashboard (sample data)
+    login/        Public sign-in page
+    api/auth/     Auth.js route handlers
     api/health/   Liveness probe
     api/ready/    Readiness probe (checks the database)
   components/
@@ -20,6 +24,9 @@ src/
                   (e.g. dashboard). Routes import from here.
   lib/            Shared, framework-agnostic utilities (cn, env, ...)
   server/db/      Prisma client singleton + DB helpers. server-only.
+  server/auth/    Auth.js config, current-user helpers. server-only.
+  server/discord/ Discord API client, token refresh, eligibility. server-only.
+  server/communities/  Tenant-isolated community reads, selection, active cookie.
   config/         Static app config (site name, nav, ...)
   generated/      Prisma client output. Gitignored; created by `prisma generate`.
   bot/            Planned Discord bot process (README only for now)
@@ -32,9 +39,9 @@ docs/             Project documentation
 
 ```
 app (routes) -> features -> components, lib, server
-components   -> lib            (never server/)
-features     -> components, lib, server/db (server components/actions only)
-server/db    -> lib (env), generated/prisma
+components   -> lib            (never server/, never features/)
+features     -> components, lib, server/* (server components/actions only)
+server/*     -> lib (env), generated/prisma, other server/* (see below)
 bot (future) -> server/db, lib (never app/, components/)
 ```
 
@@ -46,12 +53,13 @@ bot (future) -> server/db, lib (never app/, components/)
 ## Data flow (current)
 
 ```
-Browser -> Next.js route (src/app) -> [feature code] -> getDb() -> PostgreSQL
+Browser -> Next.js route (src/app) -> [feature code] -> server/* -> getDb() -> PostgreSQL
+                                                          \-> Discord API (user's token)
 ```
 
-Phase 1 pages do not read the database yet. The dashboard will initially render
-**demo data** from a feature-level fixture so the UI can be built and reviewed
-without OAuth or a bot.
+Signed-in pages read the session, memberships and (onboarding only) Discord. The
+public demo renders **demo data** from a feature-level fixture and reads nothing
+but the session cookie in the header.
 
 ## Environment handling
 
@@ -81,6 +89,130 @@ time, so `next build` and pages that never touch the database work without
 connection refused, timeout) into `false`, so the response never exposes
 connection strings or driver errors. Both routes are `force-dynamic`.
 
+## Authentication and authorization
+
+Phase 2 adds Discord sign-in (Auth.js v5), community selection and the
+protection model. Decisions: ADR-015 to ADR-024 in [DECISIONS.md](DECISIONS.md).
+
+### Layering
+
+```
+app (routes) -> features/{auth,communities} -> server/{auth,communities,discord}
+server/communities -> server/discord -> server/db
+server/auth        -> server/db, lib/env
+```
+
+| Module                 | Responsibility                                                                                                                                                                                              |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server/auth`          | Auth.js config (`config.ts`), `getCurrentUser()` / `requireUser()` (`user.ts`), the public session shape (`session.ts`), the profile mapper, the sign-in sync.                                              |
+| `server/discord`       | Discord I/O with the user's own token: `api.ts` (guild list, Zod-validated, never throws), `tokens.ts` (refresh), `permissions.ts` (BigInt eligibility), `guilds.ts` (annotated eligible guilds), `cdn.ts`. |
+| `server/communities`   | Tenant-isolated reads (`queries.ts`), `selectCommunity` (`select.ts`), the active-community cookie (`active.ts`).                                                                                           |
+| `features/auth`        | `signInWithDiscordAction`, `signOutAction`, `redirect.ts` (same-site path guard), `login-errors.ts`, `UserMenu`, `HeaderAccount`, `DiscordSubmitButton`.                                                    |
+| `features/communities` | `selectCommunityAction`, `switchActiveCommunityAction`, `OnboardingView`, `GuildCard`, `GuildSelectForm`, `CommunityOverview`.                                                                              |
+
+All of `src/server/*` starts with `import "server-only"`; a client component that
+imports it fails the build. Client components only ever receive plain display
+data (a name, an image URL, community ids and names): never a token, a session
+or an account row.
+
+### Sign-in flow
+
+```mermaid
+sequenceDiagram
+  participant B as Browser
+  participant N as NEXUS (Next.js)
+  participant D as Discord
+  participant DB as PostgreSQL
+  B->>N: POST signInWithDiscordAction (redirectTo, sanitised)
+  N-->>B: 302 to Discord authorize (scope identify guilds, state, PKCE)
+  B->>D: consent
+  D-->>B: 302 /api/auth/callback/discord?code&state
+  B->>N: GET callback
+  N->>D: token exchange (server to server, PKCE verifier)
+  D-->>N: access + refresh token
+  N->>D: GET /users/@me (profile)
+  N->>DB: upsert User + Account (tokens), create Session
+  N-->>B: Set-Cookie session token (httpOnly), 302 to redirectTo
+  B->>N: GET / with cookie
+  N->>DB: session lookup (once per request)
+  N-->>B: page for the user
+```
+
+The consent, callback, token exchange and profile fetch are Auth.js's; NEXUS adds
+the `events.signIn` sync (refresh the stored tokens and the profile on every
+sign-in, because Auth.js only does so on the first) and the whitelisted session
+callback. The steps from the consent screen onward have **not** been exercised
+against real Discord yet (see [PROGRESS.md](PROGRESS.md)).
+
+### Session strategy
+
+Database sessions (`session.strategy = "database"`, 30 days, `updateAge` 1 day).
+The cookie holds only an opaque session token; the row lives in `sessions` and is
+deleted on sign-out, so a session can be revoked server-side. The `session`
+callback builds `{ user: { id, name, image }, expires }` from scratch (never a
+spread of the adapter's objects). Cost: one indexed read per request,
+deduplicated with React `cache`. `getCurrentUser()` and `requireUser()` call
+`connection()` first so these routes are never prerendered.
+
+### Discord token storage and refresh
+
+Access and refresh tokens live in the `accounts` table (plain text, as the Auth.js
+adapter does; encryption at rest is future hardening). They are read only by
+`server/discord/tokens.ts`. `getValidDiscordAccessToken(userId)` refreshes 60
+seconds before expiry, stores the rotated pair in one update, and on
+`invalid_grant` re-reads the row in case a concurrent request already rotated it.
+When nothing usable is left it answers `reauth_required` and the UI offers
+"Reconnect Discord". Tokens are never logged, returned to components or put in
+the session.
+
+### Tenant isolation
+
+A community is reachable only through a membership row of the signed-in user:
+`listUserCommunities(userId)` and `getUserCommunity(userId, communityId)` are the
+only read paths; there is no "get by id" without a user. `selectCommunity` trusts
+nothing from the browser: it validates the id as a snowflake, re-fetches the
+user's guilds from Discord and requires owner / Administrator / Manage Server,
+then writes only the caller's own membership. `switchActiveCommunityAction` makes
+no Discord call and accepts only ids found through the caller's memberships
+(ADR-023).
+
+### Active community cookie
+
+`nexus_community` is httpOnly, `SameSite=Lax`, `Secure` in production, one year.
+It is only a hint: `getActiveCommunity(userId)` re-validates it against the
+memberships on every call (a forged or stale id is ignored) and falls back to the
+most recently joined membership, then to null (which sends the user to
+`/onboarding`).
+
+### Route protection model
+
+There is no `proxy.ts` (ADR-016): a proxy cannot check a database session without
+a round trip per request, and a cookie-presence check would only be UX.
+
+- Public: `/login`, `/demo`, `/api/health`, `/api/ready`, `/api/auth/*`.
+- Protected: everything in `src/app/(app)/(protected)/` (`/`, `/onboarding`, the
+  five coming-soon pages). The group layout calls `requireUser()` as a first gate,
+  but layouts are not re-rendered on client navigation, so **every protected page
+  and every server action calls `requireUser()` itself**. When auth is not
+  configured, `requireUser()` redirects to `/login?error=Configuration` (fail
+  closed).
+- `requireUser()` redirects to `/login`; `/login` redirects a signed-in user to
+  `/`. Post-login destinations go through `safeRedirectPath` (same-site absolute
+  paths only).
+- Server actions are public POST endpoints: each re-checks the session and takes
+  the user from it, never from form fields.
+
+### Demo separation
+
+`/demo` is the old dashboard on generated data, outside the protected group. It
+is the only route that renders demo figures: `getDashboardData()` always returns
+`source: "demo"`, the `DemoBanner` is part of that view, and `DemoIndicator`
+(header badge) shows only when the pathname is `/demo` (ADR-022). A real
+community's Overview (`CommunityOverview`) never receives or renders demo data; a
+unit test asserts it contains no numbers and no "Demo data" text. Live data
+arrives in Phase 4 for the real community's own page, not by pointing `/` at
+demo data.
+
 ## Future: Discord bot process
 
 Phase 3 adds a long-running bot (discord.js) in `src/bot/`, started separately
@@ -106,7 +238,7 @@ release cycles, `src/lib` and `src/server` can be extracted into packages then
 - shadcn/ui (`components.json`, `cn()` in `src/lib/utils.ts`); components are
   added with the shadcn CLI into `src/components/ui` and restyled through
   tokens, not per-use overrides. Added so far: button, card, badge, sheet,
-  separator, skeleton, avatar, chart. Local edits to generated files: the CLI
+  separator, skeleton, avatar, chart, dropdown-menu (written by hand in the shadcn style on `radix-ui`). Local edits to generated files: the CLI
   emitted `import { cn } from "cn"` (fixed to `@/lib/utils`), `transition-all`
   became `transition-colors`, `Card` lost its shadow and got tighter padding,
   `CardTitle` renders an `h2`.
@@ -163,9 +295,15 @@ tracked capitals.
   `src/config/navigation.ts`, which is also the source for header titles
   (`HeaderTitle`), per-route `metadata` (`navMetadata(href)`) and the "Coming
   soon" pages (`ComingSoon`).
-- `AppHeader`: page title as the page `h1`, `DemoIndicator`, and
-  `UserPlaceholder` (static "Guest / Not signed in", not a button; sign-in is
-  Phase 2).
+- `AppHeader`: page title as the page `h1`, `DemoIndicator` (client; only on
+  `/demo`) and an `account` slot filled by the layout with `HeaderAccount`
+  (`features/auth`): the `UserMenu` dropdown (avatar or initials, name, switch
+  community when there is more than one, "Change community", "Sign out") when
+  signed in, a "Sign in" link otherwise. The slot keeps `components/layout`
+  free of server imports; `HeaderAccount` degrades to the signed-out view if the
+  session store fails, so the demo always renders.
+- `SidebarNav` links Overview to `/demo` (via `demoHref` in the nav config) while
+  browsing the demo; the nav config stays the single source.
 - Landmarks: skip link, `nav aria-label="Main"`, `header`, `main#main-content`.
   Main content is capped at `max-w-7xl` and centred; no horizontal scroll at
   360px.
@@ -188,8 +326,9 @@ Shared UI lives in `src/components/common`: `StatCard`, `ChartCard`,
 - `components/` - `DashboardView` (layout), `SummaryStats`, `GrowthCard`,
   `MessagesCard`, `ActivityFeed`, `DemoBanner`, `DashboardSkeleton`, and the
   two client chart components (Recharts via the shadcn `chart` primitive).
-- Route files: `(app)/(dashboard)/page.tsx`, `loading.tsx` (skeleton),
-  `error.tsx` (boundary using Next 16's `retry`).
+- Route files: `(app)/demo/page.tsx`, `loading.tsx` (skeleton),
+  `error.tsx` (boundary using Next 16's `retry`). `(protected)/error.tsx` is the
+  equivalent boundary for signed-in pages.
 
 "Active members" means members who sent a message in the last 7 days. Deltas
 compare the last 30 days with the 30 days before. Formatting helpers in

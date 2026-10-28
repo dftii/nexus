@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { isActivePath, navigation } from "@/config/navigation";
+import { isActivePath, navigation, resolveNavHref } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
 /**
  * Primary navigation list. Client component only because it needs the current
- * pathname for the active state; the config it renders is static.
+ * pathname for the active state (and to point Overview at `/demo` while
+ * browsing the demo); the config it renders is static.
  */
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -22,7 +23,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           return (
             <li key={item.href}>
               <Link
-                href={item.href}
+                href={resolveNavHref(item, pathname)}
                 aria-current={active ? "page" : undefined}
                 onClick={onNavigate}
                 className={cn(

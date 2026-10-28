@@ -1,9 +1,10 @@
-// NEXUS data model - Phase 1 foundation.
+// NEXUS data model.
 //
-// Only the entities needed to anchor everything else are modelled here:
-// who a user is, which Discord server (community) they manage, and what role
-// they hold in it. Analytics, automations and moderation tables are added in
-// later phases, driven by real requirements (see docs/PROJECT_PLAN.md).
+// Phase 1: who a user is, which Discord server (community) they manage and what
+// role they hold in it. Phase 2 adds the Auth.js tables (Account, Session) and
+// the fields community selection needs. Analytics, automations and moderation
+// tables arrive in later phases, driven by real requirements
+// (see docs/PROJECT_PLAN.md).
 
 generator client {
   provider = "prisma-client"
@@ -34,6 +35,15 @@ model User {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  // Fields the Auth.js Prisma adapter reads and writes. `name` / `image` mirror
+  // displayName / avatarUrl; `emailVerified` stays null (no email scope, no
+  // email provider).
+  name          String?
+  image         String?
+  emailVerified DateTime? @map("email_verified")
+
+  accounts         Account[]
+  sessions         Session[]
   ownedCommunities Community[]
   memberships      CommunityMembership[]
 
@@ -42,15 +52,18 @@ model User {
 
 /// A Discord server (guild) registered in NEXUS.
 model Community {
-  id             String   @id @default(cuid())
-  discordGuildId String   @unique @map("discord_guild_id")
+  id             String    @id @default(cuid())
+  discordGuildId String    @unique @map("discord_guild_id")
   name           String
-  iconUrl        String?  @map("icon_url")
-  ownerId        String   @map("owner_id")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  iconUrl        String?   @map("icon_url")
+  /// The NEXUS user who is the Discord owner of the guild, when known.
+  ownerId        String?   @map("owner_id")
+  /// When the NEXUS bot was connected to the guild. Null = not installed.
+  botConnectedAt DateTime? @map("bot_connected_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  owner       User                  @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  owner       User?                 @relation(fields: [ownerId], references: [id], onDelete: Restrict)
   memberships CommunityMembership[]
 
   @@index([ownerId])
@@ -59,13 +72,15 @@ model Community {
 
 /// Links a user to a community with a role.
 model CommunityMembership {
-  id          String        @id @default(cuid())
-  userId      String        @map("user_id")
-  communityId String        @map("community_id")
-  role        CommunityRole @default(MEMBER)
-  joinedAt    DateTime      @default(now()) @map("joined_at")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id             String        @id @default(cuid())
+  userId         String        @map("user_id")
+  communityId    String        @map("community_id")
+  role           CommunityRole @default(MEMBER)
+  joinedAt       DateTime      @default(now()) @map("joined_at")
+  /// Last time Discord confirmed the user still manages the guild.
+  lastVerifiedAt DateTime?     @map("last_verified_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
@@ -73,4 +88,45 @@ model CommunityMembership {
   @@unique([userId, communityId])
   @@index([communityId])
   @@map("community_memberships")
+}
+
+/// An OAuth account linked to a user (Auth.js adapter model). Holds the
+/// Discord tokens; they are read only by server code and never sent to the
+/// browser.
+model Account {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String   @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+/// A database-backed login session (Auth.js adapter model).
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
 }

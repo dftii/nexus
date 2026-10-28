@@ -5,7 +5,14 @@ import { Sidebar } from "./sidebar";
  * Application frame: skip link, sidebar, header and the main landmark.
  * Server component; only the nav items and the drawer are client components.
  */
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  account,
+}: {
+  children: React.ReactNode;
+  /** Header account slot (user menu or sign-in link). */
+  account?: React.ReactNode;
+}) {
   return (
     <>
       <a
@@ -16,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
       <Sidebar />
       <div className="flex min-h-dvh flex-col lg:pl-(--sidebar-width)">
-        <AppHeader />
+        <AppHeader account={account} />
         <main
           id="main-content"
           tabIndex={-1}

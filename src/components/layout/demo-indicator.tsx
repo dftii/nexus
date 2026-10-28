@@ -1,10 +1,17 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { FlaskConical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { siteConfig } from "@/config/site";
+import { isDemoPath } from "@/config/navigation";
 
-/** Header indicator shown whenever the app runs on synthetic data. */
+/**
+ * Header indicator shown only on the demo route, the one place that renders
+ * synthetic data. Pages for a real community never show it.
+ */
 export function DemoIndicator() {
-  if (siteConfig.dataMode !== "demo") return null;
+  const pathname = usePathname();
+  if (!isDemoPath(pathname)) return null;
   return (
     <Badge
       variant="outline"
