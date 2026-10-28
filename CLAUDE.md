@@ -4,6 +4,38 @@
 
 Responder SIEMPRE en español, incluidos resúmenes, preguntas e informes finales, aunque el código, los documentos o los informes de los subagentes estén en inglés. El código, los commits y la documentación del repo siguen en inglés.
 
+## Forma de trabajar
+
+- Todo va directo a `main`: sin ramas de feature ni pull requests. Antes de cada commit y cada push, pedir permiso (no hay autorización permanente).
+- Nunca subir `.env` ni secretos. Comprobar el formato de las variables sin imprimir sus valores.
+- El usuario no pega credenciales en el chat: las pone él en `.env`.
+- Nunca resetear la base de datos ni editar migraciones ya aplicadas; las migraciones nuevas son aditivas (se generan con `prisma migrate diff` y una BD shadow temporal, sin `migrate dev`).
+- El bot lo arranca el usuario (`npm run bot:start`), nunca un agente.
+- Al terminar una fase: verificar en vivo cuando se pueda, documentar en `docs/PROGRESS.md` qué está verificado, simulado o pendiente, y preparar un informe en español para ChatGPT si el usuario lo pide.
+
+## Estado del proyecto (actualizar al terminar cada fase)
+
+NEXUS: SaaS de gestión y analíticas de comunidades de Discord. El usuario envía cada fase como un prompt escrito con ChatGPT.
+
+- **Fase 1** (base, diseño, dashboard demo en `/demo`): hecha.
+- **Fase 2** (login con Discord vía Auth.js v5, onboarding de comunidades): hecha y probada con Discord real. Ojo: el proveedor de Discord necesita `issuer: "https://discord.com"` en `src/server/auth/config.ts` o el callback falla (RFC 9207).
+- **Fase 3** (bot en `src/bot/`, tabla `message_events`, heartbeat, invitación, dashboard con datos reales): hecha y probada en vivo.
+- **Siguiente:** Fase 4, analíticas a partir de los eventos reales.
+
+Detalle técnico y decisiones: `README.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md` (ADR-001 a ADR-031), `docs/PROGRESS.md`, `src/bot/README.md`.
+
+Discord:
+- Aplicación `NEXUS (dev)` en el Developer Portal, con redirect `http://localhost:3000/api/auth/callback/discord`.
+- El bot se prueba **solo en el servidor CAPTURAS**, que es el único ID en `DISCORD_GUILD_ALLOWLIST`.
+- **No** usar el servidor "Gestión de Protocolos Nacionales": es el de los amigos del usuario y ya tiene su otro bot, dfti.security (XP y moderación tipo MEE6). Conectarlo solo cuando el bot sea estable, avisando a los amigos y repartiendo funciones con dfti.security.
+
+## Puesta en marcha en otro ordenador
+
+1. `git pull`, después `npm install`, y una sola vez `py -m pip install --user graphifyy`.
+2. Copiar el `.env` a mano, nunca por git. Lleva `DATABASE_URL`, `POSTGRES_*` (en este equipo `POSTGRES_PORT=5433` porque el 5432 estaba ocupado), `AUTH_SECRET`, `AUTH_DISCORD_ID`, `AUTH_DISCORD_SECRET`, `DISCORD_BOT_TOKEN` y `DISCORD_GUILD_ALLOWLIST`.
+3. Arrancar Docker Desktop y ejecutar `npm run db:up` y `npm run db:deploy`. La base de datos de ese ordenador empieza vacía: hay que volver a iniciar sesión y conectar CAPTURAS desde `/onboarding`. Los mensajes guardados en el otro equipo no se trasladan.
+4. Arrancar la web con `npm run dev` (http://localhost:3000) y el bot, en otra terminal, con `npm run bot:start`.
+
 ## Modelos y subagentes
 
 **Si la tarea se envía con Opus**, se reparte así:
