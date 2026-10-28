@@ -43,11 +43,19 @@ sometimes the database) with fakes; **not verified** = never run.
 - `requireUser`, the public session shape, the redirect-path guard, login error mapping.
 - UI states: Overview (no community, not connected, connected placeholder, no demo data or numbers), onboarding (list with badges, Selected, empty, reconnect, rate limit with seconds, unavailable), the select form (pending state and every error code, "Sign in again"), the user menu (name, sign-out form, switcher, no tokens in props or DOM), `HeaderAccount` (only plain data reaches the client component; failure degrades to "Sign in"), `DemoIndicator` only on `/demo`, sidebar on the demo.
 
+### Verified live with a real Discord application (2026-10-28, `npm run dev`)
+
+- Consent screen, callback, token exchange and profile fetch: a real Discord account signed in and landed on `/onboarding`.
+- The live guild list: three owned guilds rendered with real icons and "Owner" / "Not in NEXUS yet" badges.
+- A real `selectCommunity` against PostgreSQL: one community (owner set, `bot_connected_at` null) and one `OWNER` membership with `last_verified_at`, then the honest "not connected" Overview.
+- Database rows after sign-in: one user with `discord_id`, one Discord account with access and refresh tokens (server-side only), one live session.
+- First attempt failed with `CallbackRouteError`: Discord sends `iss=https://discord.com` on the callback (RFC 9207) and Auth.js' built-in Discord provider declares no issuer, so the check ran against the `https://authjs.dev` fallback. Fixed by setting `issuer: "https://discord.com"` on the provider (regression test in `tests/server/auth/auth.test.ts`).
+- The earlier `SELF_SIGNED_CERT_IN_CHAIN` seen from the agents' tooling was not reproducible from a normal shell on the development machine; Node reached discord.com with the genuine certificate chain. The README troubleshooting entry is kept for machines that do intercept TLS.
+
 ### Not verified
 
-- **The real Discord flow end to end:** the consent screen, the callback, the token exchange, the profile fetch, the live guild list, a real token refresh and a real `selectCommunity` with a real Discord account. From the development machine Node's `fetch` to discord.com fails with `SELF_SIGNED_CERT_IN_CHAIN` (HTTPS interception by local security software), so no live Discord call has succeeded here. The fix is environmental: `NODE_EXTRA_CA_CERTS` pointing at the intercepting root CA (see README, Troubleshooting).
-- The onboarding **list** (cards with real guild icons, "Selected", Connect/Select with a real response) was only rendered in tests, not in a browser, because a guild list needs a live Discord response. The reconnect state was seen in a browser.
-- `selectCommunity` against a real PostgreSQL (transaction, upserts, the `P2002` retry).
+- A real token refresh (the Discord access token lasts about 7 days); covered by mocked tests only.
+- The `P2002` race retry in `selectCommunity` against a real database (covered by tests with a fake client).
 - Sign-in with a returning user (the `events.signIn` token and profile refresh) against a real database.
 - Cookie behaviour in production mode over HTTPS (`Secure` flag).
 - Keyboard and screen-reader behaviour of the user menu beyond what Radix provides and the Testing Library roles check; no axe/Lighthouse audit.

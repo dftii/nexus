@@ -1,5 +1,9 @@
 # Reglas del proyecto
 
+## Idioma
+
+Responder SIEMPRE en español, incluidos resúmenes, preguntas e informes finales, aunque el código, los documentos o los informes de los subagentes estén en inglés. El código, los commits y la documentación del repo siguen en inglés.
+
 ## Modelos y subagentes
 
 **Si la tarea se envía con Opus**, se reparte así:

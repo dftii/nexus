@@ -35,6 +35,10 @@ export function buildAuthConfig(): NextAuthConfig {
       Discord({
         clientId: AUTH_DISCORD_ID,
         clientSecret: AUTH_DISCORD_SECRET,
+        // Discord sends `iss` on the callback (RFC 9207). The built-in
+        // provider declares no issuer, so Auth.js compares it against its
+        // "https://authjs.dev" fallback and rejects the callback.
+        issuer: "https://discord.com",
         authorization: { params: { scope: DISCORD_SCOPES } },
         profile: (profile) => mapDiscordProfile(profile),
       }),

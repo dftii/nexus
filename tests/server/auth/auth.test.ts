@@ -41,6 +41,13 @@ describe("auth config", () => {
     );
   });
 
+  it("declares Discord as issuer so the callback `iss` check passes", () => {
+    const [provider] = buildAuthConfig().providers as Array<{
+      options?: { issuer?: string };
+    }>;
+    expect(provider?.options?.issuer).toBe("https://discord.com");
+  });
+
   it("only sets up the Discord provider", () => {
     expect(buildAuthConfig().providers).toHaveLength(1);
   });
