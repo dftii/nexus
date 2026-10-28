@@ -1,0 +1,33 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# testing
+/coverage
+
+# env files (only the example is committed)
+.env*
+!.env.example
+
+# generated Prisma client (created by `prisma generate`)
+/src/generated/
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+npm-debug.log*
+.vercel
+
+# graphify local cache (the graph itself is committed)
+graphify-out/cache/

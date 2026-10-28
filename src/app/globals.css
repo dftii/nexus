@@ -1,0 +1,209 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: custom
+ * paper: oklch(0.145 0.012 285) · accent: oklch(0.55 0.21 292) · display: Geist · body: Geist
+ * nav: fixed sidebar with drawer under lg · signature: the membership growth chart under the demo-data notice · states: loading, empty, error, full
+ * axes: dark/grotesk-sans/chromatic-violet · posture: restrained, one violet accent plus one cyan data hue · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E3 S4 R4 V4 · weakest: E, the shell is standard on purpose; the one accent effect is the active-nav bar */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * NEXUS design tokens.
+ *
+ * Tailwind CSS v4 is configured in CSS (no tailwind.config.js). Token names
+ * follow shadcn/ui so components added with the shadcn CLI work unchanged.
+ * Every colour is declared here once, as oklch(); components never use a
+ * literal colour.
+ *
+ * Theme structure: all semantic tokens live on :root and currently hold the
+ * dark palette (dark is the default and only theme; <html class="dark">
+ * keeps shadcn `dark:` variants active). To add a light theme later, override
+ * the same variables under `:root[data-theme="light"]` (and drop the `dark`
+ * class when light is active); no component changes are needed.
+ *
+ * Elevation (surfaces get lighter as they rise):
+ *   0 background  page canvas
+ *   1 sidebar     chrome beside the canvas
+ *   2 card        panels on the canvas
+ *   3 popover     floating layers (sheet, menus, chart tooltip)
+ *   4 muted / secondary / accent   controls and hover fills inside panels
+ */
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --background: oklch(0.145 0.012 285); /* #09090f */
+  --foreground: oklch(0.97 0.004 285); /* #f5f5f8 */
+  --card: oklch(0.19 0.014 285); /* #13131a */
+  --card-foreground: oklch(0.97 0.004 285);
+  --popover: oklch(0.23 0.016 285); /* #1c1c24 */
+  --popover-foreground: oklch(0.97 0.004 285);
+
+  /* Brand: restrained violet. White text on it is 5.1:1. */
+  --primary: oklch(0.55 0.21 292); /* #794ddf */
+  --primary-foreground: oklch(0.985 0 0); /* #fafafa */
+
+  /* Neutral fills for controls and hover states */
+  --secondary: oklch(0.27 0.017 285); /* #25252f */
+  --secondary-foreground: oklch(0.97 0.004 285);
+  --muted: oklch(0.235 0.015 285); /* #1d1d25 */
+  --muted-foreground: oklch(0.72 0.02 285); /* #a3a3b1, 7.4:1 on card */
+  --accent: oklch(0.28 0.02 285); /* #282833 */
+  --accent-foreground: oklch(0.97 0.004 285);
+
+  --destructive: oklch(0.55 0.2 25); /* #cc272e */
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* Lines and focus. Borders are decorative (1.35:1 on card); the focus ring
+   * is 7.5:1 on the canvas. */
+  --border: oklch(0.3 0.018 285); /* #2d2d37 */
+  --input: oklch(0.34 0.02 285); /* #373742 */
+  --ring: oklch(0.72 0.17 292); /* #a88dff */
+
+  /* Charts: series are told apart by shape and label as well as hue. */
+  --chart-1: oklch(0.72 0.16 292); /* violet  #a88fff */
+  --chart-2: oklch(0.82 0.12 210); /* cyan    #50d9ef */
+  --chart-3: oklch(0.78 0.15 160); /* green   #4ad496 */
+  --chart-4: oklch(0.82 0.14 80); /* amber   #f3b94c */
+  --chart-5: oklch(0.72 0.18 350); /* pink    #f46eb4 */
+
+  /* Sidebar */
+  --sidebar: oklch(0.165 0.013 285); /* #0e0e14 */
+  --sidebar-foreground: oklch(0.97 0.004 285);
+  --sidebar-primary: oklch(0.55 0.21 292);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.24 0.018 285);
+  --sidebar-accent-foreground: oklch(0.97 0.004 285);
+  --sidebar-border: oklch(0.27 0.017 285);
+  --sidebar-ring: oklch(0.72 0.17 292);
+
+  /* NEXUS-specific */
+  --signal: oklch(0.82 0.12 210); /* cyan data accent, 11:1 on card */
+  --signal-foreground: oklch(0.18 0.03 210);
+  --success: oklch(0.78 0.15 160); /* positive change */
+  --danger: oklch(0.72 0.17 25); /* negative change as text, #fd736d, 6.9:1 */
+  --warning: oklch(0.82 0.14 80); /* demo-data notice */
+  --warning-foreground: oklch(0.2 0.04 80);
+
+  --radius: 0.625rem;
+  --header-height: 3.5rem;
+  --sidebar-width: 15rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Fonts are self-hosted by the `geist` package through next/font/local;
+   * see src/app/layout.tsx. */
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  html {
+    overflow-x: clip;
+    scroll-padding-top: calc(var(--header-height) + 1rem);
+    scrollbar-color: var(--input) var(--background);
+  }
+
+  body {
+    overflow-x: clip;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    font-feature-settings:
+      "calt" 1,
+      "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 45%, transparent);
+    color: var(--foreground);
+  }
+
+  /* Visible, instant focus ring on every interactive element. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,1328 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1793205887.6047604,
+    "seen": 1793208843.5089269,
+    "ast_hash": "cd45288e382f8f6633fb2e0e874f9421",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/scripts/pull-hig.mjs": {
+    "mtime": 1793205551.1083963,
+    "seen": 1793208843.5089412,
+    "ast_hash": "d165d3e20ac91db2351473365153b7fe",
+    "semantic_hash": ""
+  },
+  ".prettierrc.json": {
+    "mtime": 1793206622.1126926,
+    "seen": 1793208843.5089478,
+    "ast_hash": "fb1b5898d52fc68834b03c260def7fd6",
+    "semantic_hash": ""
+  },
+  "components.json": {
+    "mtime": 1793206622.5996013,
+    "seen": 1793208843.5089521,
+    "ast_hash": "99cd2c1611d84662712cc9da39a01f9c",
+    "semantic_hash": ""
+  },
+  "docker-compose.yml": {
+    "mtime": 1793206640.869771,
+    "seen": 1793208843.5089555,
+    "ast_hash": "601871be61de519839f06be6c6958097",
+    "semantic_hash": ""
+  },
+  "eslint.config.mjs": {
+    "mtime": 1793206621.9866922,
+    "seen": 1793208843.508958,
+    "ast_hash": "4f52cb8d0d52316e45d85d1b972cbf59",
+    "semantic_hash": ""
+  },
+  "next.config.ts": {
+    "mtime": 1793206621.5527613,
+    "seen": 1793208843.5089612,
+    "ast_hash": "60d0b280dcfed562506982b66c9604df",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1793207297.9483593,
+    "seen": 1793208843.5089636,
+    "ast_hash": "18626943556f9c4941394c2da97d0f75",
+    "semantic_hash": ""
+  },
+  "prisma.config.ts": {
+    "mtime": 1793206523.4221473,
+    "seen": 1793208843.5089664,
+    "ast_hash": "a47bc9978099fa7d3638ecde863e3bff",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/(dashboard)/error.tsx": {
+    "mtime": 1793207703.4147239,
+    "seen": 1793208843.508969,
+    "ast_hash": "2ee71fb5a16536de0016c0f1d8433456",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/(dashboard)/loading.tsx": {
+    "mtime": 1793207703.2772942,
+    "seen": 1793208843.5089717,
+    "ast_hash": "be1aa159cc24e0588f9cf105496c3f39",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/(dashboard)/page.tsx": {
+    "mtime": 1793207703.1550827,
+    "seen": 1793208843.508975,
+    "ast_hash": "a602ee1bd55d03b09a310767cf8b4a1a",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/analytics/page.tsx": {
+    "mtime": 1793207688.8256965,
+    "seen": 1793208843.5089781,
+    "ast_hash": "a4f64625b6e2c58cfdcd357e73814174",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/automations/page.tsx": {
+    "mtime": 1793207689.0900693,
+    "seen": 1793208843.5089812,
+    "ast_hash": "0a2ba707e88d47231730495921c803a6",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/layout.tsx": {
+    "mtime": 1793207702.9464824,
+    "seen": 1793208843.5089839,
+    "ast_hash": "c575d5354470be65e154fea6bbd6dbae",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/leaderboard/page.tsx": {
+    "mtime": 1793207689.6395907,
+    "seen": 1793208843.5089867,
+    "ast_hash": "f17d584b522bfbaef76e0e3bf57af996",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/moderation/page.tsx": {
+    "mtime": 1793207689.3629115,
+    "seen": 1793208843.5089893,
+    "ast_hash": "ab05e3ac78003550e2b2e0dade4b75df",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/settings/page.tsx": {
+    "mtime": 1793207689.9129424,
+    "seen": 1793208843.5089922,
+    "ast_hash": "94db1d051a64584004bf94fe14da57c1",
+    "semantic_hash": ""
+  },
+  "src/app/api/health/route.ts": {
+    "mtime": 1793206623.6184273,
+    "seen": 1793208843.5089948,
+    "ast_hash": "79d53a69f915ae0524ab4c6bb23ba1bb",
+    "semantic_hash": ""
+  },
+  "src/app/api/ready/route.ts": {
+    "mtime": 1793206623.7434766,
+    "seen": 1793208843.5089974,
+    "ast_hash": "917c722294cdd09c43cfe42d6f258196",
+    "semantic_hash": ""
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1793207456.9711397,
+    "seen": 1793208843.5090005,
+    "ast_hash": "f6f98e99f5be51c724eb037c0e90ec88",
+    "semantic_hash": ""
+  },
+  "src/components/common/chart-card.tsx": {
+    "mtime": 1793207603.1132395,
+    "seen": 1793208843.509003,
+    "ast_hash": "c66d30db8059437916e1210b3288b6a2",
+    "semantic_hash": ""
+  },
+  "src/components/common/coming-soon.tsx": {
+    "mtime": 1793207709.8402948,
+    "seen": 1793208843.5090072,
+    "ast_hash": "ee3e45dcca8171d0920b542219f00b7b",
+    "semantic_hash": ""
+  },
+  "src/components/common/empty-state.tsx": {
+    "mtime": 1793207602.5554318,
+    "seen": 1793208843.5090098,
+    "ast_hash": "85203383480e87000dd411081364fb3c",
+    "semantic_hash": ""
+  },
+  "src/components/common/sr-data-table.tsx": {
+    "mtime": 1793207602.9332626,
+    "seen": 1793208843.5090125,
+    "ast_hash": "779b9dcbd03cc46cb49d1985c60c6c88",
+    "semantic_hash": ""
+  },
+  "src/components/common/stat-card.tsx": {
+    "mtime": 1793207602.7285457,
+    "seen": 1793208843.509015,
+    "ast_hash": "c91a57efd99b71669d8f907f1bc05ae1",
+    "semantic_hash": ""
+  },
+  "src/components/layout/app-header.tsx": {
+    "mtime": 1793207626.189787,
+    "seen": 1793208843.5090177,
+    "ast_hash": "5a6e4037ec29098720940edb4d826f59",
+    "semantic_hash": ""
+  },
+  "src/components/layout/app-shell.tsx": {
+    "mtime": 1793207626.3245502,
+    "seen": 1793208843.5090203,
+    "ast_hash": "aff8c42ff8bef76a82b755148b76b5a3",
+    "semantic_hash": ""
+  },
+  "src/components/layout/brand.tsx": {
+    "mtime": 1793207625.1583114,
+    "seen": 1793208843.5090227,
+    "ast_hash": "61f638214a7de338462d6f4734aadda7",
+    "semantic_hash": ""
+  },
+  "src/components/layout/demo-indicator.tsx": {
+    "mtime": 1793207625.9200213,
+    "seen": 1793208843.5090253,
+    "ast_hash": "8b663323b52347d4ab4fa5ae916637d2",
+    "semantic_hash": ""
+  },
+  "src/components/layout/header-title.tsx": {
+    "mtime": 1793207625.7349112,
+    "seen": 1793208843.5090282,
+    "ast_hash": "c6fde47dbee4d9167cb8d233e917cae0",
+    "semantic_hash": ""
+  },
+  "src/components/layout/mobile-nav.tsx": {
+    "mtime": 1793207625.5960069,
+    "seen": 1793208843.5090306,
+    "ast_hash": "cac621004ea77a80ef4d30bf8d28eab9",
+    "semantic_hash": ""
+  },
+  "src/components/layout/sidebar-nav.tsx": {
+    "mtime": 1793207625.3197622,
+    "seen": 1793208843.5090332,
+    "ast_hash": "5e4ab88d286355061d862d7142f67346",
+    "semantic_hash": ""
+  },
+  "src/components/layout/sidebar.tsx": {
+    "mtime": 1793207625.4570904,
+    "seen": 1793208843.5090358,
+    "ast_hash": "e1d96198136d09fc9f17bd78c337b9c9",
+    "semantic_hash": ""
+  },
+  "src/components/layout/user-placeholder.tsx": {
+    "mtime": 1793207626.0658233,
+    "seen": 1793208843.5090384,
+    "ast_hash": "69741906aee4d11909f89a502b9f4f84",
+    "semantic_hash": ""
+  },
+  "src/components/ui/avatar.tsx": {
+    "mtime": 1793207710.1145964,
+    "seen": 1793208843.5090408,
+    "ast_hash": "8a95c498abb687cf923642503e665baf",
+    "semantic_hash": ""
+  },
+  "src/components/ui/badge.tsx": {
+    "mtime": 1793207710.132699,
+    "seen": 1793208843.5090437,
+    "ast_hash": "1016a06b3cbe26d40a0502cc3d9df6a7",
+    "semantic_hash": ""
+  },
+  "src/components/ui/button.tsx": {
+    "mtime": 1793207710.1531496,
+    "seen": 1793208843.5090463,
+    "ast_hash": "363f3cbda2b9d6851b2e20da35613434",
+    "semantic_hash": ""
+  },
+  "src/components/ui/card.tsx": {
+    "mtime": 1793207710.1806521,
+    "seen": 1793208843.5090485,
+    "ast_hash": "d82c4c9910af7a9107ee5c6ca4c3f125",
+    "semantic_hash": ""
+  },
+  "src/components/ui/chart.tsx": {
+    "mtime": 1793207710.2870722,
+    "seen": 1793208843.5090513,
+    "ast_hash": "f2d59a606226989b6a527d126ed8aa60",
+    "semantic_hash": ""
+  },
+  "src/components/ui/separator.tsx": {
+    "mtime": 1793207710.2999156,
+    "seen": 1793208843.5090725,
+    "ast_hash": "b6f1e69ee0343375283feafec3a8c5a9",
+    "semantic_hash": ""
+  },
+  "src/components/ui/sheet.tsx": {
+    "mtime": 1793207710.3256588,
+    "seen": 1793208843.5090792,
+    "ast_hash": "01ffd3224d33cf28fb4baa5fd2346539",
+    "semantic_hash": ""
+  },
+  "src/components/ui/skeleton.tsx": {
+    "mtime": 1793207710.3393052,
+    "seen": 1793208843.5090828,
+    "ast_hash": "12f5e87881e53f72962664eb91565a87",
+    "semantic_hash": ""
+  },
+  "src/config/navigation.ts": {
+    "mtime": 1793207472.0871818,
+    "seen": 1793208843.509087,
+    "ast_hash": "4e6511d7f3df2439920e60201492d501",
+    "semantic_hash": ""
+  },
+  "src/config/site.ts": {
+    "mtime": 1793207472.0129273,
+    "seen": 1793208843.5090897,
+    "ast_hash": "9b9c678e31576ae2903898968d547b08",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/activity-feed.tsx": {
+    "mtime": 1793208166.0423427,
+    "seen": 1793208843.5090926,
+    "ast_hash": "1cf5457183521e5b4d0882f6a2d9dcf2",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/dashboard-skeleton.tsx": {
+    "mtime": 1793208255.8119304,
+    "seen": 1793208843.5090954,
+    "ast_hash": "01948393ae83fe83a889204e876c4390",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/dashboard-view.tsx": {
+    "mtime": 1793208255.8084724,
+    "seen": 1793208843.509098,
+    "ast_hash": "eaf9e3384e07ca2ead5c9d6cd3833271",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/demo-banner.tsx": {
+    "mtime": 1793207710.522257,
+    "seen": 1793208843.5091004,
+    "ast_hash": "551a8e44c5f49467ed3d266a663acf97",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/growth-card.tsx": {
+    "mtime": 1793208338.8271334,
+    "seen": 1793208843.5091033,
+    "ast_hash": "04cabdbb628da308fb5d760e65dc6d52",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/membership-growth-chart.tsx": {
+    "mtime": 1793208344.4827552,
+    "seen": 1793208843.509106,
+    "ast_hash": "e4958a99934a6a33a2fcd75c99271640",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/message-activity-chart.tsx": {
+    "mtime": 1793208255.8099625,
+    "seen": 1793208843.5091085,
+    "ast_hash": "415b3687707731a43d2590d92872cd73",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/messages-card.tsx": {
+    "mtime": 1793207686.791612,
+    "seen": 1793208843.5091114,
+    "ast_hash": "71ebc28eb35e31ae143e4ff144987ef6",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/components/summary-stats.tsx": {
+    "mtime": 1793208719.057731,
+    "seen": 1793208843.5091136,
+    "ast_hash": "d12f5b6fa912929c8a1d4447506586d0",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/data/demo.ts": {
+    "mtime": 1793208159.6541247,
+    "seen": 1793208843.5091164,
+    "ast_hash": "ed5156501917cfbd9f0b1a351284ffe8",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/data/index.ts": {
+    "mtime": 1793207521.923388,
+    "seen": 1793208843.509119,
+    "ast_hash": "891229f9db818fae2e108a8363e4cfe9",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/lib/chart.ts": {
+    "mtime": 1793207662.5711682,
+    "seen": 1793208843.509122,
+    "ast_hash": "ab54e15195c3afab9fb86b6ba4126472",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/lib/delta.ts": {
+    "mtime": 1793207494.0771854,
+    "seen": 1793208843.5091245,
+    "ast_hash": "98fc4971e4e905bf7b3557598994a279",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/lib/prng.ts": {
+    "mtime": 1793207494.1515186,
+    "seen": 1793208843.5091271,
+    "ast_hash": "5211a948f8e32862741010bbc8be3250",
+    "semantic_hash": ""
+  },
+  "src/features/dashboard/types.ts": {
+    "mtime": 1793207710.791362,
+    "seen": 1793208843.50913,
+    "ast_hash": "76ebaad1cfa8b658e98fe012e059347e",
+    "semantic_hash": ""
+  },
+  "src/lib/env.ts": {
+    "mtime": 1793206623.017274,
+    "seen": 1793208843.5091329,
+    "ast_hash": "ab96176faca2d4356dd3f7e949fd6232",
+    "semantic_hash": ""
+  },
+  "src/lib/format.ts": {
+    "mtime": 1793207493.9346719,
+    "seen": 1793208843.5091357,
+    "ast_hash": "1478fe30205afb62c397c75042ee3254",
+    "semantic_hash": ""
+  },
+  "src/lib/utils.ts": {
+    "mtime": 1793206622.7177832,
+    "seen": 1793208843.5091383,
+    "ast_hash": "84971bc0b843a34bbec829e896dc4b37",
+    "semantic_hash": ""
+  },
+  "src/server/db/client.ts": {
+    "mtime": 1793206623.1573012,
+    "seen": 1793208843.5091414,
+    "ast_hash": "5841d47e142f87591b08222fc526c337",
+    "semantic_hash": ""
+  },
+  "src/server/db/index.ts": {
+    "mtime": 1793206623.4881675,
+    "seen": 1793208843.509144,
+    "ast_hash": "9b9fc4b118e0925f8265136e86099a40",
+    "semantic_hash": ""
+  },
+  "src/server/db/ping.ts": {
+    "mtime": 1793206623.339913,
+    "seen": 1793208843.5091467,
+    "ast_hash": "c916686d2c1c17dfe9542bea56c162bc",
+    "semantic_hash": ""
+  },
+  "tests/app/api/health.test.ts": {
+    "mtime": 1793206658.0554047,
+    "seen": 1793208843.5091496,
+    "ast_hash": "253ace2d31efdce12a15c768f966aa53",
+    "semantic_hash": ""
+  },
+  "tests/app/api/ready.test.ts": {
+    "mtime": 1793206813.5815485,
+    "seen": 1793208843.509152,
+    "ast_hash": "5dc66c0d9403d280df4e7012c0ab6631",
+    "semantic_hash": ""
+  },
+  "tests/components/common/empty-state.test.tsx": {
+    "mtime": 1793207934.3295667,
+    "seen": 1793208843.5091546,
+    "ast_hash": "700d63f60bde68220a63e046f6806b62",
+    "semantic_hash": ""
+  },
+  "tests/components/layout/sidebar-nav.test.tsx": {
+    "mtime": 1793207994.032308,
+    "seen": 1793208843.5091572,
+    "ast_hash": "39168c1fd853d7302a54f998238e58e9",
+    "semantic_hash": ""
+  },
+  "tests/config/navigation.test.ts": {
+    "mtime": 1793207907.8538523,
+    "seen": 1793208843.5091596,
+    "ast_hash": "c0c7fcc7c6824f69b80ee5eb48afe34f",
+    "semantic_hash": ""
+  },
+  "tests/features/dashboard/dashboard-view.test.tsx": {
+    "mtime": 1793207973.9198108,
+    "seen": 1793208843.5091624,
+    "ast_hash": "004a99f73965a62b894b802a90903cbb",
+    "semantic_hash": ""
+  },
+  "tests/features/dashboard/delta.test.ts": {
+    "mtime": 1793207934.56169,
+    "seen": 1793208843.5091653,
+    "ast_hash": "d337ed7e7bda216be039363a90a183f0",
+    "semantic_hash": ""
+  },
+  "tests/features/dashboard/demo-data.test.ts": {
+    "mtime": 1793207908.3677063,
+    "seen": 1793208843.5091684,
+    "ast_hash": "97c47f571902e5137529d3d9dabdae5d",
+    "semantic_hash": ""
+  },
+  "tests/features/dashboard/prng.test.ts": {
+    "mtime": 1793207908.0460525,
+    "seen": 1793208843.509171,
+    "ast_hash": "6aaaaf2336017c4cd37530b98752902e",
+    "semantic_hash": ""
+  },
+  "tests/lib/env.test.ts": {
+    "mtime": 1793206657.981456,
+    "seen": 1793208843.509174,
+    "ast_hash": "b567f87f00fc5e6bdb2c7af883dfb89d",
+    "semantic_hash": ""
+  },
+  "tests/lib/format.test.ts": {
+    "mtime": 1793207907.6818695,
+    "seen": 1793208843.5091765,
+    "ast_hash": "eb0cd4672a80934fc070541e8f00311e",
+    "semantic_hash": ""
+  },
+  "tests/lib/utils.test.ts": {
+    "mtime": 1793206658.2599924,
+    "seen": 1793208843.5091789,
+    "ast_hash": "470c1e2d8fe0b39b6e643a733a772091",
+    "semantic_hash": ""
+  },
+  "tests/server/db/ping.test.ts": {
+    "mtime": 1793206813.5841208,
+    "seen": 1793208843.509182,
+    "ast_hash": "9bd1b3b45379f3c819718d9826d5fa8e",
+    "semantic_hash": ""
+  },
+  "tests/setup.ts": {
+    "mtime": 1793207907.5207572,
+    "seen": 1793208843.509185,
+    "ast_hash": "6c7abbb59c55c7d3d78f1f860e191596",
+    "semantic_hash": ""
+  },
+  "tests/stubs/server-only.ts": {
+    "mtime": 1793206622.479886,
+    "seen": 1793208843.509188,
+    "ast_hash": "e2ebd7ddedcadeeadbf819c35985c768",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1793206621.7636194,
+    "seen": 1793208843.5091906,
+    "ast_hash": "4e22e417c349ba6afdabd57ba19a3b0a",
+    "semantic_hash": ""
+  },
+  "vitest.config.mts": {
+    "mtime": 1793207907.3045163,
+    "seen": 1793208843.5091932,
+    "ast_hash": "dfef245afa10c5bb7a41d7ed8ed00849",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1793205519.3766606,
+    "seen": 1793208843.5091958,
+    "ast_hash": "9b31786b637be3c13978bec4c2330752",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/SKILL.md": {
+    "mtime": 1793205549.84831,
+    "seen": 1793208843.5091987,
+    "ast_hash": "127580c60b9e800fb6c877897aa67c96",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/code-audit.md": {
+    "mtime": 1793205549.873983,
+    "seen": 1793208843.5092008,
+    "ast_hash": "e8d0c6da370c0f4722b534961bb21784",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/cross-platform.md": {
+    "mtime": 1793205551.0751617,
+    "seen": 1793208843.509206,
+    "ast_hash": "e47191c85294dff73981988b0c6bbe3b",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig-lookup.md": {
+    "mtime": 1793205551.0915556,
+    "seen": 1793208843.5092087,
+    "ast_hash": "6def2974674e0655148cf387dfaadef0",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/accessibility.md": {
+    "mtime": 1793205551.0069318,
+    "seen": 1793208843.509211,
+    "ast_hash": "e2adcd461fe88e4c7456eaa3b650eea9",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/action-sheets.md": {
+    "mtime": 1793205550.9773753,
+    "seen": 1793208843.5092137,
+    "ast_hash": "b25a05aa59548842734ab8cc437b3dc7",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/activity-views.md": {
+    "mtime": 1793205551.0583384,
+    "seen": 1793208843.5092163,
+    "ast_hash": "ba5cca7c3bde128d54381de7c4b35091",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/airplay.md": {
+    "mtime": 1793205551.0705261,
+    "seen": 1793208843.509219,
+    "ast_hash": "4e6ec5090951780b17eddbbf34615a3c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/alerts.md": {
+    "mtime": 1793205550.973392,
+    "seen": 1793208843.5092213,
+    "ast_hash": "44dcdb54fc52bc7cd25330e332fd1d36",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/app-clips.md": {
+    "mtime": 1793205550.8967278,
+    "seen": 1793208843.5092242,
+    "ast_hash": "9f8c13d30b59670747ca09f80caec6a7",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/app-icons.md": {
+    "mtime": 1793205550.9915183,
+    "seen": 1793208843.509227,
+    "ast_hash": "f5030b8e7504ef0a24b11f6ef62c1c83",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/app-shortcuts.md": {
+    "mtime": 1793205550.9422524,
+    "seen": 1793208843.50923,
+    "ast_hash": "9271280c4103481b38bb824f3bef743c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/apple-in-app-purchase.md": {
+    "mtime": 1793205550.9554524,
+    "seen": 1793208843.5092323,
+    "ast_hash": "df38c869a670fe874ae4fd216c08741b",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/apple-pay.md": {
+    "mtime": 1793205551.0275764,
+    "seen": 1793208843.509235,
+    "ast_hash": "7a81c133679630a6e8855fae431134c1",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/apple-pencil-and-scribble.md": {
+    "mtime": 1793205550.84005,
+    "seen": 1793208843.5092375,
+    "ast_hash": "88a3301376ec8f9e7de925c115caf958",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/augmented-reality.md": {
+    "mtime": 1793205550.8471112,
+    "seen": 1793208843.5092402,
+    "ast_hash": "65f48a33a6101cb52bbad0c9d9e5883e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/boxes.md": {
+    "mtime": 1793205550.5857055,
+    "seen": 1793208843.5092425,
+    "ast_hash": "67c1cd222a355b91c5fd1bd12f273420",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/branding.md": {
+    "mtime": 1793205550.8584156,
+    "seen": 1793208843.5092452,
+    "ast_hash": "6e62fda9b8ded0934b55b34469f3666c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/buttons.md": {
+    "mtime": 1793205550.5922966,
+    "seen": 1793208843.5092475,
+    "ast_hash": "877b127ca4157d6cf9eb6cc76c987c11",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/charting-data.md": {
+    "mtime": 1793205550.908384,
+    "seen": 1793208843.5092506,
+    "ast_hash": "2b566ccbff9623746441d4d8ff8d0f75",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/charts.md": {
+    "mtime": 1793205550.923307,
+    "seen": 1793208843.509253,
+    "ast_hash": "24397bb34db3ab1f27d0b1f8245a7af6",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/collaboration-and-sharing.md": {
+    "mtime": 1793205551.0449035,
+    "seen": 1793208843.509256,
+    "ast_hash": "8f826b544b08f7314b59ed3d777db72b",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/collections.md": {
+    "mtime": 1793205550.872213,
+    "seen": 1793208843.5092587,
+    "ast_hash": "7bd1e568846fb24d2fd7b68347befb49",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/color-wells.md": {
+    "mtime": 1793205551.0247798,
+    "seen": 1793208843.5092614,
+    "ast_hash": "199675ee1310cc57893eedc89fa3c8d4",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/color.md": {
+    "mtime": 1793205550.6066816,
+    "seen": 1793208843.5092638,
+    "ast_hash": "f122c827126a6ba245e676515874ac28",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/column-views.md": {
+    "mtime": 1793205549.88277,
+    "seen": 1793208843.5092664,
+    "ast_hash": "f2cf0df574b707cb40325ca2af6c8553",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/combo-boxes.md": {
+    "mtime": 1793205549.891646,
+    "seen": 1793208843.509269,
+    "ast_hash": "5d856a8ee9eae11d07f66d7a0751e224",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/context-menus.md": {
+    "mtime": 1793205550.9567153,
+    "seen": 1793208843.5092716,
+    "ast_hash": "390301a8dcfcc92fd820638707cd313b",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/controls.md": {
+    "mtime": 1793205550.619164,
+    "seen": 1793208843.5092745,
+    "ast_hash": "3bf60664f9934641875e75533f3af800",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/dark-mode.md": {
+    "mtime": 1793205550.2847998,
+    "seen": 1793208843.5092769,
+    "ast_hash": "c8004a9d9b80d5ce66bc265234fda971",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/design-principles.md": {
+    "mtime": 1793205550.292558,
+    "seen": 1793208843.5092797,
+    "ast_hash": "cbc73236f0b686f7f9ab4d02d992bcfb",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/designing-for-games.md": {
+    "mtime": 1793205550.3067327,
+    "seen": 1793208843.5092828,
+    "ast_hash": "c9b6983ad23d39c3952849161ff9801d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/designing-for-ios.md": {
+    "mtime": 1793205549.8992126,
+    "seen": 1793208843.5092854,
+    "ast_hash": "a10b8cb4f441bb36afbf078c9c15f458",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/designing-for-ipados.md": {
+    "mtime": 1793205550.6267588,
+    "seen": 1793208843.5092878,
+    "ast_hash": "4106aa6697d5d98cd6a94b9f2457037e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/designing-for-iphone-duo.md": {
+    "mtime": 1793205550.640108,
+    "seen": 1793208843.5092905,
+    "ast_hash": "9d79ff31098ea1125ba64797c2075789",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/designing-for-macos.md": {
+    "mtime": 1793205549.9104953,
+    "seen": 1793208843.5092928,
+    "ast_hash": "aa68710dd0914e99553acb6b032f9bc1",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/disclosure-controls.md": {
+    "mtime": 1793205550.3186193,
+    "seen": 1793208843.5092957,
+    "ast_hash": "fd81a81f04291ab841cbf5349412d8a7",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/dock-menus.md": {
+    "mtime": 1793205549.9132783,
+    "seen": 1793208843.509298,
+    "ast_hash": "d50cd7f6735af1c6e0236eeac5a9a4ae",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/drag-and-drop.md": {
+    "mtime": 1793205550.3233497,
+    "seen": 1793208843.5093007,
+    "ast_hash": "0db2d017b21f7abdc95a0401cf3a88f7",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/edit-menus.md": {
+    "mtime": 1793205550.8819208,
+    "seen": 1793208843.5093036,
+    "ast_hash": "2502715e819d52de67b8a135e96dcaca",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/entering-data.md": {
+    "mtime": 1793205550.8923042,
+    "seen": 1793208843.5093062,
+    "ast_hash": "425c53e973d733577700bf6907aeba9f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/feedback.md": {
+    "mtime": 1793205551.005295,
+    "seen": 1793208843.5093088,
+    "ast_hash": "6a13aa0350c5b2c6da50c0ccfccb35bf",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/file-management.md": {
+    "mtime": 1793205550.342262,
+    "seen": 1793208843.5093114,
+    "ast_hash": "84cc6d6a49301837bca5a06a268dc33d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/focus-and-selection.md": {
+    "mtime": 1793205550.351908,
+    "seen": 1793208843.509314,
+    "ast_hash": "edc5f9b6953e9394ce48cad37e83ce9a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/game-controls.md": {
+    "mtime": 1793205550.6503477,
+    "seen": 1793208843.509317,
+    "ast_hash": "7159f0da4923a32466eef86d80710cdb",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/gauges.md": {
+    "mtime": 1793205549.9272902,
+    "seen": 1793208843.5093198,
+    "ast_hash": "fb242836183f971b97f5eb15a75525da",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/generative-ai.md": {
+    "mtime": 1793205549.9318821,
+    "seen": 1793208843.5093224,
+    "ast_hash": "444f38ea14f3552094eaf4910476728e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/gestures.md": {
+    "mtime": 1793205550.364028,
+    "seen": 1793208843.509325,
+    "ast_hash": "f7d598c02b68cc8f90ed3b9c50b73021",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/going-full-screen.md": {
+    "mtime": 1793205550.6614406,
+    "seen": 1793208843.5093277,
+    "ast_hash": "eef964da544ac03dc79c495d8f709366",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/gyro-and-accelerometer.md": {
+    "mtime": 1793205550.37338,
+    "seen": 1793208843.50933,
+    "ast_hash": "1b05d67ecdd89f224b084f5c6b048153",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/home-screen-quick-actions.md": {
+    "mtime": 1793205549.9416642,
+    "seen": 1793208843.5093324,
+    "ast_hash": "bd149e70f2ff30cac190fe3a4dea4a4a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/icloud.md": {
+    "mtime": 1793205549.9488406,
+    "seen": 1793208843.509335,
+    "ast_hash": "24bba27c1d40b108bfa1c1f2ea31ca87",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/icons.md": {
+    "mtime": 1793205550.3815389,
+    "seen": 1793208843.5093377,
+    "ast_hash": "007e8f147be77c3a20196f7b596aa0a3",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/image-views.md": {
+    "mtime": 1793205549.9589446,
+    "seen": 1793208843.50934,
+    "ast_hash": "7ee82dfa143fb7c5adeb5315f82cd61a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/image-wells.md": {
+    "mtime": 1793205550.3917086,
+    "seen": 1793208843.5093427,
+    "ast_hash": "35aec93c5a72856246946dc4be3d38d8",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/images.md": {
+    "mtime": 1793205549.9687726,
+    "seen": 1793208843.5093453,
+    "ast_hash": "6e11d7f0ed815891db374eeeb97ae630",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/inclusion.md": {
+    "mtime": 1793205550.6699407,
+    "seen": 1793208843.5093477,
+    "ast_hash": "6dcfb33a766a5ed53036dd935f512fd5",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/keyboards.md": {
+    "mtime": 1793205549.9768493,
+    "seen": 1793208843.50935,
+    "ast_hash": "78f83469aecea82f292a4460e1ab1cee",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/labels.md": {
+    "mtime": 1793205550.678574,
+    "seen": 1793208843.5093527,
+    "ast_hash": "e5d13d5e95f7c4cbe87bd0eef034495b",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/launching.md": {
+    "mtime": 1793205550.3917086,
+    "seen": 1793208843.5093555,
+    "ast_hash": "ed498bcd212ac3e65b10f97d6fe1bde0",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/layout.md": {
+    "mtime": 1793205550.695793,
+    "seen": 1793208843.5093582,
+    "ast_hash": "d9e588578c9e422c1067da734d38b5e7",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/liquid-glass.md": {
+    "mtime": 1793205550.40835,
+    "seen": 1793208843.5093608,
+    "ast_hash": "7c86f23b3cf1c4c442fd8b3103b9802d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/lists-and-tables.md": {
+    "mtime": 1793205550.4100335,
+    "seen": 1793208843.5093634,
+    "ast_hash": "e540d2a37179078ec267da531176372c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/live-activities.md": {
+    "mtime": 1793205549.9819798,
+    "seen": 1793208843.509366,
+    "ast_hash": "0866eab696fd2a2ff75a7848bb77c5e2",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/live-viewing-apps.md": {
+    "mtime": 1793205550.7066169,
+    "seen": 1793208843.5093687,
+    "ast_hash": "75d733f61003aa97b151b8f890d6f70c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/loading.md": {
+    "mtime": 1793205549.9954512,
+    "seen": 1793208843.509371,
+    "ast_hash": "3ef41c1e301682a1a019abb8ee9c6c9a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/machine-learning.md": {
+    "mtime": 1793205550.715392,
+    "seen": 1793208843.5093737,
+    "ast_hash": "6fee59ff043dd76ca4035b22a99665a8",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/managing-accounts.md": {
+    "mtime": 1793205550.0095706,
+    "seen": 1793208843.5093763,
+    "ast_hash": "8d9b5d02d54233d7d607267f40b13a74",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/managing-notifications.md": {
+    "mtime": 1793205550.4255705,
+    "seen": 1793208843.509379,
+    "ast_hash": "ea1bd1efb1c5f8f8aabdc02023cffe0e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/maps.md": {
+    "mtime": 1793205550.7233343,
+    "seen": 1793208843.5093813,
+    "ast_hash": "43121c056b70b2bc70e0b816307eef3c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/materials.md": {
+    "mtime": 1793205550.016859,
+    "seen": 1793208843.509384,
+    "ast_hash": "52ad18417deb9f3b5b9e1fde13f83543",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/menus.md": {
+    "mtime": 1793205550.0257342,
+    "seen": 1793208843.5093865,
+    "ast_hash": "a7885624cd970133787f5253b5544a8f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/modality.md": {
+    "mtime": 1793205550.0302913,
+    "seen": 1793208843.5093892,
+    "ast_hash": "9e1c472d56c01e8f35f8e8c12a0d7ece",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/motion.md": {
+    "mtime": 1793205550.9255369,
+    "seen": 1793208843.5093918,
+    "ast_hash": "82906b749766e84f47126d44db888cba",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/multitasking.md": {
+    "mtime": 1793205550.4388158,
+    "seen": 1793208843.5093946,
+    "ast_hash": "0e479820a7cc542cde68943d7a9d1dc4",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/nfc.md": {
+    "mtime": 1793205550.0423045,
+    "seen": 1793208843.5093973,
+    "ast_hash": "789c939be5c688cf134ff8640ad3b301",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/notifications.md": {
+    "mtime": 1793205550.0453749,
+    "seen": 1793208843.5094001,
+    "ast_hash": "fbc25c7c4c3642bdf8509b15355c92bf",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/offering-help.md": {
+    "mtime": 1793205550.0602937,
+    "seen": 1793208843.5094025,
+    "ast_hash": "96ef76756be51006b859636cc96049a8",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/onboarding.md": {
+    "mtime": 1793205550.4416165,
+    "seen": 1793208843.5094054,
+    "ast_hash": "bbb76d5e76577042d1c5703981d25278",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/outline-views.md": {
+    "mtime": 1793205550.7307205,
+    "seen": 1793208843.5094078,
+    "ast_hash": "c58fc65b0a63cb81ca693fb6b4c13fb2",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/page-controls.md": {
+    "mtime": 1793205550.4481864,
+    "seen": 1793208843.5094104,
+    "ast_hash": "68e4096f6a6ee03001d78945b91f7895",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/panels.md": {
+    "mtime": 1793205550.073452,
+    "seen": 1793208843.509413,
+    "ast_hash": "99567c96b582b2f9fcc6a6922a501d78",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/path-controls.md": {
+    "mtime": 1793205550.0845454,
+    "seen": 1793208843.5094156,
+    "ast_hash": "fd6bcd73f795326a8809a97cb70af927",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/pickers.md": {
+    "mtime": 1793205550.090084,
+    "seen": 1793208843.5094182,
+    "ast_hash": "24a13987857870e2f69cb2ec5749acca",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/playing-audio.md": {
+    "mtime": 1793205550.7422516,
+    "seen": 1793208843.5094209,
+    "ast_hash": "d637bd92e40d454c8b03a7f5cdc9b791",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/playing-haptics.md": {
+    "mtime": 1793205550.4642513,
+    "seen": 1793208843.509423,
+    "ast_hash": "52267b1c08060cfd4a539e1ba472025c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/playing-video.md": {
+    "mtime": 1793205550.0988352,
+    "seen": 1793208843.5094259,
+    "ast_hash": "a5d3329a4d3111f1a639ff15b6821bb6",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/pointing-devices.md": {
+    "mtime": 1793205550.106701,
+    "seen": 1793208843.5094347,
+    "ast_hash": "7a5e4ed4cf8bb37893d1e124b949e874",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/pop-up-buttons.md": {
+    "mtime": 1793205550.1120763,
+    "seen": 1793208843.5094404,
+    "ast_hash": "5ed70087402b462f13111bdf28e3853a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/popovers.md": {
+    "mtime": 1793205550.1250942,
+    "seen": 1793208843.5094457,
+    "ast_hash": "88bd8dd78ed312907af40aafe0faebfc",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/printing.md": {
+    "mtime": 1793205550.747699,
+    "seen": 1793208843.5094502,
+    "ast_hash": "8b436e9989e6a219fd6a5836eb0b33de",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/privacy.md": {
+    "mtime": 1793205550.1406686,
+    "seen": 1793208843.5094528,
+    "ast_hash": "79951c2afc1f830089080e933816c028",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/progress-indicators.md": {
+    "mtime": 1793205550.4733102,
+    "seen": 1793208843.5094557,
+    "ast_hash": "a13e5589dd2661d1d94332d94fab6894",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/pull-down-buttons.md": {
+    "mtime": 1793205550.7589383,
+    "seen": 1793208843.509458,
+    "ast_hash": "ef8ccab25314297adf65882f128d8bb5",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/rating-indicators.md": {
+    "mtime": 1793205550.1507435,
+    "seen": 1793208843.5094607,
+    "ast_hash": "98b51408c83f2c5106cab32f100401dd",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/ratings-and-reviews.md": {
+    "mtime": 1793205550.1585183,
+    "seen": 1793208843.5094635,
+    "ast_hash": "3503f16771cddde8a220cd9f52927cd9",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/right-to-left.md": {
+    "mtime": 1793205550.4781408,
+    "seen": 1793208843.5094662,
+    "ast_hash": "456ce86ff01ec28b06b49c92cf84c5f2",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/scroll-views.md": {
+    "mtime": 1793205550.1695411,
+    "seen": 1793208843.5094683,
+    "ast_hash": "c1ffa735617af309b9391721e97315b2",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/search-fields.md": {
+    "mtime": 1793205550.7734468,
+    "seen": 1793208843.509471,
+    "ast_hash": "8173261fc8adf561cd21a89d67b84f90",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/searching.md": {
+    "mtime": 1793205550.1760674,
+    "seen": 1793208843.5094738,
+    "ast_hash": "d01f67f61e3d51e31b4393a37af417a6",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/segmented-controls.md": {
+    "mtime": 1793205550.4899776,
+    "seen": 1793208843.5094762,
+    "ast_hash": "d91433b88df7bbf07e14dc53c487da3d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/settings.md": {
+    "mtime": 1793205550.7734468,
+    "seen": 1793208843.5094788,
+    "ast_hash": "b303ca808cde9e5e7bf8bc2781ac2ee3",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/sf-symbols.md": {
+    "mtime": 1793205550.1853757,
+    "seen": 1793208843.5094814,
+    "ast_hash": "d044461839b185169febe6a8c08c5a8f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/sheets.md": {
+    "mtime": 1793205550.791653,
+    "seen": 1793208843.509484,
+    "ast_hash": "3797c4c7a665addfc5cc461a5acdf0e6",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/sidebars.md": {
+    "mtime": 1793205550.7942288,
+    "seen": 1793208843.5094867,
+    "ast_hash": "87bd4f5ea2415a4024e77831369cf4f4",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/sign-in-with-apple.md": {
+    "mtime": 1793205550.1935441,
+    "seen": 1793208843.5094888,
+    "ast_hash": "1237b51257bdd0f64b571dbf1ae2487f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/siri.md": {
+    "mtime": 1793205550.8073592,
+    "seen": 1793208843.5094917,
+    "ast_hash": "49d7ccb6727a0fa79500e6842a0b5765",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/sliders.md": {
+    "mtime": 1793205550.4922068,
+    "seen": 1793208843.509494,
+    "ast_hash": "4ab98c61e0296ff01782624f575cef80",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/snippets.md": {
+    "mtime": 1793205550.2108574,
+    "seen": 1793208843.5094967,
+    "ast_hash": "6a7b23410788a16d925fe2c4d6a29f20",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/split-views.md": {
+    "mtime": 1793205550.8235931,
+    "seen": 1793208843.5094993,
+    "ast_hash": "b4ec8736e37985299e95080b63a0d990",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/status-bars.md": {
+    "mtime": 1793205550.5066674,
+    "seen": 1793208843.509502,
+    "ast_hash": "84c2aa968f56f3c82deb294ecafa7930",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/steppers.md": {
+    "mtime": 1793205550.2141685,
+    "seen": 1793208843.5095048,
+    "ast_hash": "e273db43d19aee38a297cfe6c26aceef",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/tab-bars.md": {
+    "mtime": 1793205550.2257147,
+    "seen": 1793208843.5095074,
+    "ast_hash": "cb9f70f1a0094906ebeabceaf0820cba",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/tab-views.md": {
+    "mtime": 1793205550.5139823,
+    "seen": 1793208843.5095096,
+    "ast_hash": "16eebd747bcc9fc7d0d272dcc79a14ef",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/text-fields.md": {
+    "mtime": 1793205550.5249405,
+    "seen": 1793208843.5095122,
+    "ast_hash": "cbbedd932c5c4d8d3a51c2516c81c983",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/text-views.md": {
+    "mtime": 1793205550.2257147,
+    "seen": 1793208843.5095148,
+    "ast_hash": "2ad32aa0d46e7036bc2f581900ddfb6f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/the-menu-bar.md": {
+    "mtime": 1793205550.5323222,
+    "seen": 1793208843.5095177,
+    "ast_hash": "44c156d2f2e6d4ee65c3ab7d70d2e520",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/toggles.md": {
+    "mtime": 1793205550.5422754,
+    "seen": 1793208843.50952,
+    "ast_hash": "38cb853c2e92285a5cfe031cf225a1cc",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/token-fields.md": {
+    "mtime": 1793205550.5439348,
+    "seen": 1793208843.509523,
+    "ast_hash": "3536f238567c08fc99328dc51b73b045",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/toolbars.md": {
+    "mtime": 1793205550.2449436,
+    "seen": 1793208843.5095255,
+    "ast_hash": "c8900ed4f7014d945a7a17e2b9ef58dd",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/typography.md": {
+    "mtime": 1793205550.2461247,
+    "seen": 1793208843.5095284,
+    "ast_hash": "0e620225b2ebb051ac5d63e71fd6fe3e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/undo-and-redo.md": {
+    "mtime": 1793205550.2591245,
+    "seen": 1793208843.509531,
+    "ast_hash": "9daf58b0ad403abcb919c70f3409664b",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/virtual-keyboards.md": {
+    "mtime": 1793205550.2740333,
+    "seen": 1793208843.5095336,
+    "ast_hash": "4d0fd4a64739899092613deb00d7cb61",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/voiceover.md": {
+    "mtime": 1793205550.558452,
+    "seen": 1793208843.5095365,
+    "ast_hash": "dede3434a42825c62f8dce7abc5e926f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/web-views.md": {
+    "mtime": 1793205550.5687022,
+    "seen": 1793208843.5095394,
+    "ast_hash": "f17d00c62861bc64f5a56e5a794b7955",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/widgets.md": {
+    "mtime": 1793205550.2772803,
+    "seen": 1793208843.509542,
+    "ast_hash": "9929735ffdca1e1f992f8164276006c2",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/windows.md": {
+    "mtime": 1793205550.5781786,
+    "seen": 1793208843.5095446,
+    "ast_hash": "955f78cf927973aaeb25cc24a70a0825",
+    "semantic_hash": ""
+  },
+  ".claude/skills/apple-design/references/hig/writing.md": {
+    "mtime": 1793205550.8258502,
+    "seen": 1793208843.5095475,
+    "ast_hash": "b1aa661f6af8c7a9ebef703782ba17ec",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1793206182.7292523,
+    "seen": 1793208843.50955,
+    "ast_hash": "c98dbebb744eadc1acc4b9f58bfe0f42",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1793205558.9917402,
+    "seen": 1793208843.5095527,
+    "ast_hash": "30cd88da590fc56308de7df4e86f1897",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1793208477.60989,
+    "seen": 1793208843.509555,
+    "ast_hash": "3b3150eed56e880cb28da8821b6df982",
+    "semantic_hash": ""
+  },
+  "docs/ARCHITECTURE.md": {
+    "mtime": 1793208505.2227685,
+    "seen": 1793208843.509558,
+    "ast_hash": "6fc5cf0d0d61d70d2799c4bd6b20ce44",
+    "semantic_hash": ""
+  },
+  "docs/DECISIONS.md": {
+    "mtime": 1793208501.5604563,
+    "seen": 1793208843.5095608,
+    "ast_hash": "cbe4d3070bfd2d3fdce4ee3027604715",
+    "semantic_hash": ""
+  },
+  "docs/PROGRESS.md": {
+    "mtime": 1793208505.3228612,
+    "seen": 1793208843.5095634,
+    "ast_hash": "e699eb98f7368daf069c929fbef94daa",
+    "semantic_hash": ""
+  },
+  "docs/PROJECT_PLAN.md": {
+    "mtime": 1793207000.8767402,
+    "seen": 1793208843.5095663,
+    "ast_hash": "3917e2293a18d567a90bb931c19eab38",
+    "semantic_hash": ""
+  },
+  "src/bot/README.md": {
+    "mtime": 1793206640.938249,
+    "seen": 1793208843.5095687,
+    "ast_hash": "4787746da39fcd7346797d7315794691",
+    "semantic_hash": ""
+  },
+  "package-lock.json": {
+    "mtime": 1793207298.696893,
+    "seen": 1793208843.5095713,
+    "ast_hash": "fea80bbb44a4a7be9ee4539c4a55d220",
+    "semantic_hash": ""
+  }
+}

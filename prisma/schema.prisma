@@ -1,0 +1,76 @@
+// NEXUS data model - Phase 1 foundation.
+//
+// Only the entities needed to anchor everything else are modelled here:
+// who a user is, which Discord server (community) they manage, and what role
+// they hold in it. Analytics, automations and moderation tables are added in
+// later phases, driven by real requirements (see docs/PROJECT_PLAN.md).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CommunityRole {
+  OWNER
+  ADMIN
+  MODERATOR
+  MEMBER
+
+  @@map("community_role")
+}
+
+/// A person who signs in to NEXUS through Discord.
+model User {
+  id          String   @id @default(cuid())
+  discordId   String   @unique @map("discord_id")
+  username    String
+  displayName String?  @map("display_name")
+  avatarUrl   String?  @map("avatar_url")
+  email       String?  @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  ownedCommunities Community[]
+  memberships      CommunityMembership[]
+
+  @@map("users")
+}
+
+/// A Discord server (guild) registered in NEXUS.
+model Community {
+  id             String   @id @default(cuid())
+  discordGuildId String   @unique @map("discord_guild_id")
+  name           String
+  iconUrl        String?  @map("icon_url")
+  ownerId        String   @map("owner_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  owner       User                  @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  memberships CommunityMembership[]
+
+  @@index([ownerId])
+  @@map("communities")
+}
+
+/// Links a user to a community with a role.
+model CommunityMembership {
+  id          String        @id @default(cuid())
+  userId      String        @map("user_id")
+  communityId String        @map("community_id")
+  role        CommunityRole @default(MEMBER)
+  joinedAt    DateTime      @default(now()) @map("joined_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@index([communityId])
+  @@map("community_memberships")
+}

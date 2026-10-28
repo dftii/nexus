@@ -1,0 +1,11 @@
+.next
+node_modules
+coverage
+src/generated
+prisma/migrations
+package-lock.json
+next-env.d.ts
+.claude
+CLAUDE.md
+AGENTS.md
+graphify-out

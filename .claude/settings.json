@@ -1,21 +1,4 @@
 {
-  "extraKnownMarketplaces": {
-    "hallmark": {
-      "source": { "source": "github", "repo": "Nutlope/hallmark" }
-    },
-    "ponytail": {
-      "source": { "source": "github", "repo": "dietrichgebert/ponytail" }
-    },
-    "claude-kit": {
-      "source": { "source": "github", "repo": "JohnnyVizz/claude-kit" }
-    }
-  },
-  "enabledPlugins": {
-    "hallmark@hallmark": true,
-    "ponytail@ponytail": true,
-    "savvy-flow@claude-kit": true,
-    "savvy-progress@claude-kit": true
-  },
   "hooks": {
     "PreToolUse": [
       {
@@ -39,5 +22,31 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "hallmark@hallmark": true,
+    "ponytail@ponytail": true,
+    "savvy-flow@claude-kit": true,
+    "savvy-progress@claude-kit": true
+  },
+  "extraKnownMarketplaces": {
+    "hallmark": {
+      "source": {
+        "source": "github",
+        "repo": "Nutlope/hallmark"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "dietrichgebert/ponytail"
+      }
+    },
+    "claude-kit": {
+      "source": {
+        "source": "github",
+        "repo": "JohnnyVizz/claude-kit"
+      }
+    }
   }
 }
